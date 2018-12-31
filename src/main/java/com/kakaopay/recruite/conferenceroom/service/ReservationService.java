@@ -1,5 +1,6 @@
 package com.kakaopay.recruite.conferenceroom.service;
 
+import com.kakaopay.recruite.conferenceroom.domain.Reservation;
 import com.kakaopay.recruite.conferenceroom.domain.ReservationData;
 import com.kakaopay.recruite.conferenceroom.repository.ReservationRepository;
 import lombok.extern.slf4j.Slf4j;
@@ -7,8 +8,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDate;
+import java.util.ArrayList;
 import java.util.List;
-import java.util.stream.Stream;
 
 @Service
 @Slf4j
@@ -39,8 +40,7 @@ public class ReservationService {
      * @return 해당 날짜에 등록된 예약 List
      */
     public List<ReservationData> findReservation(LocalDate date) {
-        List<ReservationData> reservationDataList = reservationRepository.findAllByDateAndDayOfWeek(date, date.getDayOfWeek());
-        return reservationDataList;
+        return reservationRepository.findAllByDateAndDayOfWeek(date, date.getDayOfWeek());
     }
 
     /**

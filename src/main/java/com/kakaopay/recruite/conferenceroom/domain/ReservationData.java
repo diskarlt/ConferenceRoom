@@ -2,6 +2,7 @@ package com.kakaopay.recruite.conferenceroom.domain;
 
 import lombok.Data;
 import lombok.NonNull;
+import lombok.RequiredArgsConstructor;
 
 import javax.persistence.*;
 import java.time.DayOfWeek;
@@ -10,6 +11,7 @@ import java.time.LocalTime;
 
 @Entity
 @Data
+@RequiredArgsConstructor
 @Table(indexes = {@Index(columnList = "roomName, startDate, endDate, dayOfWeek, startTime, endTime")})
 public class ReservationData {
     @Id
@@ -26,9 +28,10 @@ public class ReservationData {
     private int repeat;
 
     @NonNull
-    private LocalDate date;
     private DayOfWeek dayOfWeek;
+    @NonNull
     private LocalDate startDate;
+    @NonNull
     private LocalDate endDate;
     @NonNull
     private LocalTime startTime;
@@ -36,12 +39,25 @@ public class ReservationData {
     private LocalTime endTime;
 
     public ReservationData() {}
-    public ReservationData(String roomName, String userName, String subject, int repeat, LocalDate date, LocalTime startTime, LocalTime endTime) {
-        this.roomName = roomName;
-        this.userName = userName;
-        this.subject = subject;
-        this.repeat = repeat;
-        this.date = date;
+    public ReservationData(Reservation req) {
+        LocalDate date = LocalDate.of(
+                Integer.valueOf(req.getDate().split("-")[0]),
+                Integer.valueOf(req.getDate().split("-")[1]),
+                Integer.valueOf(req.getDate().split("-")[2])
+        );
+        LocalTime startTime = LocalTime.of(
+                Integer.valueOf(req.getStartTime().split(":")[0]),
+                Integer.valueOf(req.getStartTime().split(":")[1])
+        );
+        LocalTime endTime = LocalTime.of(
+                Integer.valueOf(req.getEndTime().split(":")[0]),
+                Integer.valueOf(req.getEndTime().split(":")[1])
+        );
+
+        this.roomName = req.getRoomName();
+        this.userName = req.getUserName();
+        this.subject = req.getSubject();
+        this.repeat = req.getRepeat();
         this.dayOfWeek = date.getDayOfWeek();
         this.startDate = date;
         this.endDate = date.plusWeeks(repeat);

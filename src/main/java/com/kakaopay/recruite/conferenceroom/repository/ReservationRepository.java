@@ -9,7 +9,6 @@ import java.time.DayOfWeek;
 import java.time.LocalDate;
 import java.time.LocalTime;
 import java.util.List;
-import java.util.stream.Stream;
 
 public interface ReservationRepository extends CrudRepository<ReservationData, Long> {
     @Query("select case when count(e)>0 then true else false end " +

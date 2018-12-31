@@ -47,7 +47,7 @@ public class ServiceTests {
         LocalTime endTime = LocalTime.of(11,30);
         int repeat = 0;
 
-        ReservationData reservationData = new ReservationData(roomName, userName, subject, repeat, date, startTime, endTime);
+        ReservationData reservationData = new ReservationData(roomName, userName, subject, repeat, date.getDayOfWeek(), date, date, startTime, endTime);
         when(reservationRepository.isConflict(anyString(), any(LocalDate.class), any(LocalDate.class), any(DayOfWeek.class), any(LocalTime.class), any(LocalTime.class))).thenReturn(false);
         when(reservationRepository.save(any(ReservationData.class))).thenReturn(reservationData);
 
@@ -70,7 +70,7 @@ public class ServiceTests {
         LocalTime endTime = LocalTime.of(11,30);
         int repeat = 3;
 
-        ReservationData reservationData = new ReservationData(roomName, userName, subject, repeat, date, startTime, endTime);
+        ReservationData reservationData = new ReservationData(roomName, userName, subject, repeat, date.getDayOfWeek(), date, date.plusWeeks(repeat), startTime, endTime);
         when(reservationRepository.isConflict(anyString(), any(LocalDate.class), any(LocalDate.class), any(DayOfWeek.class), any(LocalTime.class), any(LocalTime.class))).thenReturn(false);
         when(reservationRepository.save(any(ReservationData.class))).thenReturn(reservationData);
 
@@ -93,7 +93,7 @@ public class ServiceTests {
         LocalTime endTime = LocalTime.of(11,30);
         int repeat = 3;
 
-        ReservationData reservationData = new ReservationData(roomName, userName, subject, repeat, date, startTime, endTime);
+        ReservationData reservationData = new ReservationData(roomName, userName, subject, repeat, date.getDayOfWeek(), date, date.plusWeeks(repeat), startTime, endTime);
         when(reservationRepository.isConflict(anyString(), any(LocalDate.class), any(LocalDate.class), any(DayOfWeek.class), any(LocalTime.class), any(LocalTime.class))).thenReturn(true);
 
         assertFalse(reservationService.createReservation(reservationData));
@@ -111,8 +111,8 @@ public class ServiceTests {
         LocalDate date = LocalDate.of(2019, 1, 1);
         int repeat = 3;
 
-        ReservationData reservationData1 = new ReservationData("회의실 A", "사용자 A", subject, 0, date, LocalTime.of(10,0), LocalTime.of(11,30));
-        ReservationData reservationData2 = new ReservationData("회의실 B", "사용자 B", subject, repeat, date, LocalTime.of(11,0), LocalTime.of(12, 0));
+        ReservationData reservationData1 = new ReservationData("회의실 A", "사용자 A", subject, 0, date.getDayOfWeek(), date, date, LocalTime.of(10,0), LocalTime.of(11,30));
+        ReservationData reservationData2 = new ReservationData("회의실 B", "사용자 B", subject, repeat, date.getDayOfWeek(), date, date.plusWeeks(repeat), LocalTime.of(11,0), LocalTime.of(12, 0));
         reservationData1.setId(1L);
         reservationData2.setId(2L);
         List<ReservationData> reservationDataList = new ArrayList<>();

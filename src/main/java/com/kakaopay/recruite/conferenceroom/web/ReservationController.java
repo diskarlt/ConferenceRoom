@@ -1,6 +1,7 @@
 package com.kakaopay.recruite.conferenceroom.web;
 
 import com.kakaopay.recruite.conferenceroom.domain.ReservationData;
+import com.kakaopay.recruite.conferenceroom.domain.Reservation;
 import com.kakaopay.recruite.conferenceroom.service.ReservationService;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -8,7 +9,9 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import javax.validation.Valid;
 import java.time.LocalDate;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
@@ -18,32 +21,28 @@ public class ReservationController {
     @Autowired
     ReservationService reservationService;
 
-    //@RequestMapping(value="/reservations", method = RequestMethod.POST, consumes = "application/json")
     @PostMapping(value = "/reservations", consumes = "application/json")
-    public ResponseEntity<Void> create(@RequestBody ReservationData req) {
+    public ResponseEntity<Void> create(@Valid @RequestBody Reservation req) {
         log.debug(req.toString());
+        ReservationData reservationData = new ReservationData(req);
 
-        if( req.getStartTime().getMinute() != 0 && req.getStartTime().getMinute() != 30 ||
-            req.getEndTime().getMinute() != 0 && req.getEndTime().getMinute() != 30)
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST).build();
-
-        if(req.getStartTime().compareTo(req.getEndTime()) >= 0)
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST).build();
-
-        if(reservationService.createReservation(req) == false)
+        if(reservationService.createReservation(reservationData) == false)
             return ResponseEntity.status(HttpStatus.CONFLICT).build();
 
         return ResponseEntity.status(HttpStatus.OK).build();
     }
 
     @GetMapping(value = "/reservations")
-    public List<ReservationData> find(@RequestParam Map<String, String> parameters) {
+    public List<Reservation> find(@RequestParam Map<String, String> parameters) {
         int year = Integer.valueOf(parameters.get("year"));
         int month = Integer.valueOf(parameters.get("month"));
         int day = Integer.valueOf(parameters.get("day"));
         LocalDate date = LocalDate.of(year, month, day);
 
-        return reservationService.findReservation(date);
+        List<Reservation> reservationList = new ArrayList<>();
+
+        reservationService.findReservation(date).forEach(reservationData -> reservationList.add(new Reservation(reservationData)));
+        return reservationList;
     }
 
     @DeleteMapping(value = "/reservations/{id}")

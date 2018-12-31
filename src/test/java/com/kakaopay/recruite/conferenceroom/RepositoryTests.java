@@ -1,6 +1,7 @@
 package com.kakaopay.recruite.conferenceroom;
 
 import com.kakaopay.recruite.conferenceroom.domain.ReservationData;
+import com.kakaopay.recruite.conferenceroom.domain.Reservation;
 import com.kakaopay.recruite.conferenceroom.repository.ReservationRepository;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -24,14 +25,9 @@ public class RepositoryTests {
      */
     @Test
     public void test_create_onetime_reservation() {
-        String roomName = "회의실 A";
-        int repeat = 0;
-        LocalDate date = LocalDate.of(2019, 1, 1);
-        LocalTime startTime = LocalTime.of(10, 30);
-        LocalTime endTime = LocalTime.of(11,30);
-
         // 예약 등록
-        ReservationData reservationData = new ReservationData(roomName, "사용자 A", "Subject", repeat, date, startTime, endTime);
+        Reservation request = new Reservation("회의실 A", "사용자 A", "Subject", 0, "2019-01-01", "10:30", "11:30");
+        ReservationData reservationData = new ReservationData(request);
         reservationRepository.save(reservationData);
 
         // 예약 조회
@@ -46,14 +42,9 @@ public class RepositoryTests {
      */
     @Test
     public void test_create_repeat_reservation() {
-        String roomName = "회의실 A";
-        int repeat = 3;
-        LocalDate date = LocalDate.of(2019, 1, 1);
-        LocalTime startTime = LocalTime.of(10,0);
-        LocalTime endTime = LocalTime.of(11,30);
-
         // 예약 등록
-        ReservationData reservationData = new ReservationData(roomName, "사용자 A", "Subject", repeat, date, startTime, endTime);
+        Reservation request = new Reservation("회의실 A", "사용자 A", "Subject", 3, "2019-01-01", "10:30", "11:30");
+        ReservationData reservationData = new ReservationData(request);
         reservationRepository.save(reservationData);
 
         // 예약 조회
@@ -87,7 +78,8 @@ public class RepositoryTests {
         LocalTime endTime = LocalTime.of(11, 30);
 
         // 예약 등록
-        ReservationData reservationData = new ReservationData(roomName, "UserA", "Subject", 0, date, startTime, endTime);
+        Reservation request = new Reservation("회의실 A", "사용자 A", "Subject", 3, "2019-01-01", "10:00", "11:30");
+        ReservationData reservationData = new ReservationData(request);
         reservationRepository.save(reservationData);
 
         for(int repeat=0; repeat<3; ++repeat) { // 1회성 및 반복성 예약을 모두 확인한다. 2주 정도까지 확인한다.
@@ -129,7 +121,8 @@ public class RepositoryTests {
         LocalTime endTime = LocalTime.of(11, 30);
 
         // 예약 등록
-        ReservationData reservationData = new ReservationData(roomName, "사용자 A", "Subject", 3, date, startTime, endTime);
+        Reservation request = new Reservation("회의실 A", "사용자 A", "Subject", 3, "2019-01-01", "10:00", "11:30");
+        ReservationData reservationData = new ReservationData(request);
         reservationRepository.save(reservationData);
 
         for(int repeat=0; repeat<3; ++repeat) { // 1회성 및 반복성 예약을 모두 확인한다. 2주 정도까지 확인한다.
@@ -159,6 +152,4 @@ public class RepositoryTests {
             assertTrue(reservationRepository.isConflict(roomName, date, date.plusWeeks(repeat), date.getDayOfWeek(), startTime.plusMinutes(30), endTime.plusMinutes(30)));
         }
     }
-
-
 }

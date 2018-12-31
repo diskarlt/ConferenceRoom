@@ -1,6 +1,6 @@
 package com.kakaopay.recruite.conferenceroom;
 
-import com.kakaopay.recruite.conferenceroom.domain.ReservationData;
+import com.kakaopay.recruite.conferenceroom.domain.Reservation;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -10,8 +10,6 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.test.context.junit4.SpringRunner;
 
-import java.time.LocalDate;
-import java.time.LocalTime;
 import java.util.Arrays;
 import java.util.List;
 
@@ -30,9 +28,9 @@ public class ControllerTests {
      */
     @Test
     public void test_create_onetime_reservation() {
-        ReservationData reservationData = new ReservationData("회의실 A", "사용자 A", "Subject", 0, LocalDate.of(2019, 1, 1), LocalTime.of(10, 0), LocalTime.of(10, 30));
-        ResponseEntity<Void> responseEntity = restTemplate.postForEntity("/reservations", reservationData, Void.class);
-        assertEquals(responseEntity.getStatusCode(), HttpStatus.OK);
+        Reservation reservation = new Reservation("회의실 A", "사용자 A", "Subject", 0, "2019-01-01", "10:00", "10:30");
+        ResponseEntity<Void> responseEntity = restTemplate.postForEntity("/reservations", reservation, Void.class);
+        assertEquals(HttpStatus.OK, responseEntity.getStatusCode());
     }
 
     /**
@@ -40,9 +38,9 @@ public class ControllerTests {
      * 예약 : 10:30~11:00, 3회 추가 반복 (성공)
      */
     @Test public void test_create_repeat_reservation() {
-        ReservationData reservationData = new ReservationData("회의실 A", "사용자 A", "Subject", 3, LocalDate.of(2019, 1, 1), LocalTime.of(10, 30), LocalTime.of(11, 0));
-        ResponseEntity<Void> responseEntity = restTemplate.postForEntity("/reservations", reservationData, Void.class);
-        assertEquals(responseEntity.getStatusCode(), HttpStatus.OK);
+        Reservation reservation = new Reservation("회의실 A", "사용자 A", "Subject", 0, "2019-01-01", "10:30", "11:00");
+        ResponseEntity<Void> responseEntity = restTemplate.postForEntity("/reservations", reservation, Void.class);
+        assertEquals(HttpStatus.OK, responseEntity.getStatusCode());
     }
 
     /**
@@ -52,14 +50,14 @@ public class ControllerTests {
      */
     @Test
     public void test_create_bad_time_reservation() {
-        ReservationData reservationData1 = new ReservationData("회의실 A", "사용자 A", "Subject", 0, LocalDate.of(2019, 1, 1), LocalTime.of(9, 20), LocalTime.of(10, 0));
-        ReservationData reservationData2 = new ReservationData("회의실 A", "사용자 A", "Subject", 0, LocalDate.of(2019, 1, 1), LocalTime.of(9, 30), LocalTime.of(10, 10));
+        Reservation reservation1 = new Reservation("회의실 A", "사용자 A", "Subject", 0, "2019-01-01", "09:20", "10:00");
+        Reservation reservation2 = new Reservation("회의실 A", "사용자 A", "Subject", 0, "2019-01-01", "09:30", "11:10");
 
-        ResponseEntity<Void> responseEntity1 = restTemplate.postForEntity("/reservations", reservationData1, Void.class);
-        ResponseEntity<Void> responseEntity2 = restTemplate.postForEntity("/reservations", reservationData2, Void.class);
+        ResponseEntity<Void> responseEntity1 = restTemplate.postForEntity("/reservations", reservation1, Void.class);
+        ResponseEntity<Void> responseEntity2 = restTemplate.postForEntity("/reservations", reservation2, Void.class);
 
-        assertEquals(responseEntity1.getStatusCode(), HttpStatus.BAD_REQUEST);
-        assertEquals(responseEntity2.getStatusCode(), HttpStatus.BAD_REQUEST);
+        assertEquals(HttpStatus.BAD_REQUEST, responseEntity1.getStatusCode());
+        assertEquals(HttpStatus.BAD_REQUEST, responseEntity2.getStatusCode());
     }
 
     /**
@@ -68,9 +66,9 @@ public class ControllerTests {
      */
     @Test
     public void test_create_start_time_after_end_time_reservation() {
-        ReservationData reservationData = new ReservationData("회의실 A", "사용자 A", "Subject", 0, LocalDate.of(2019, 1, 1), LocalTime.of(10, 0), LocalTime.of(9, 0));
-        ResponseEntity<Void> responseEntity = restTemplate.postForEntity("/reservations", reservationData, Void.class);
-        assertEquals(responseEntity.getStatusCode(), HttpStatus.BAD_REQUEST);
+        Reservation reservation = new Reservation("회의실 A", "사용자 A", "Subject", 0, "2019-01-01", "10:00", "09:00");
+        ResponseEntity<Void> responseEntity = restTemplate.postForEntity("/reservations", reservation, Void.class);
+        assertEquals(HttpStatus.BAD_REQUEST, responseEntity.getStatusCode());
     }
 
     /**
@@ -79,15 +77,15 @@ public class ControllerTests {
      * 예약 2 : 11:00 ~ 12:00 (성공)
      */
     @Test
-    public void test_create_same_time_reservation() {
-        ReservationData reservationData1 = new ReservationData("회의실 B", "사용자 A", "Subject", 0, LocalDate.of(2019, 1, 1), LocalTime.of(10, 0), LocalTime.of(11, 0));
-        ReservationData reservationData2 = new ReservationData("회의실 B", "사용자 A", "Subject", 0, LocalDate.of(2019, 1, 1), LocalTime.of(11, 0), LocalTime.of(12, 0));
+    public void test_create_continual_time_reservation() {
+        Reservation reservation1 = new Reservation("회의실 B", "사용자 A", "Subject", 0, "2019-01-01", "10:00", "11:00");
+        Reservation reservation2 = new Reservation("회의실 B", "사용자 A", "Subject", 0, "2019-01-01", "11:00", "12:00");
 
-        ResponseEntity<Void> responseEntity1 = restTemplate.postForEntity("/reservations", reservationData1, Void.class);
-        ResponseEntity<Void> responseEntity2 = restTemplate.postForEntity("/reservations", reservationData2, Void.class);
+        ResponseEntity<Void> responseEntity1 = restTemplate.postForEntity("/reservations", reservation1, Void.class);
+        ResponseEntity<Void> responseEntity2 = restTemplate.postForEntity("/reservations", reservation2, Void.class);
 
-        assertEquals(responseEntity1.getStatusCode(), HttpStatus.OK);
-        assertEquals(responseEntity2.getStatusCode(), HttpStatus.OK);
+        assertEquals(HttpStatus.OK, responseEntity1.getStatusCode());
+        assertEquals(HttpStatus.OK, responseEntity2.getStatusCode());
     }
 
     /**
@@ -97,14 +95,14 @@ public class ControllerTests {
      */
     @Test
     public void test_create_conflict_reservation() {
-        ReservationData reservationData1 = new ReservationData("회의실 C", "사용자 A", "Subject", 0, LocalDate.of(2019, 1, 1), LocalTime.of(10, 0), LocalTime.of(11, 0));
-        ReservationData reservationData2 = new ReservationData("회의실 C", "사용자 B", "Subject", 0, LocalDate.of(2019, 1, 1), LocalTime.of(9, 0), LocalTime.of(10, 30));
+        Reservation reservation1 = new Reservation("회의실 C", "사용자 A", "Subject", 0, "2019-01-01", "10:00", "11:00");
+        Reservation reservation2 = new Reservation("회의실 C", "사용자 B", "Subject", 0, "2019-01-01", "09:00", "10:30");
 
-        ResponseEntity<Void> responseEntity1 = restTemplate.postForEntity("/reservations", reservationData1, Void.class);
-        ResponseEntity<Void> responseEntity2 = restTemplate.postForEntity("/reservations", reservationData2, Void.class);
+        ResponseEntity<Void> responseEntity1 = restTemplate.postForEntity("/reservations", reservation1, Void.class);
+        ResponseEntity<Void> responseEntity2 = restTemplate.postForEntity("/reservations", reservation2, Void.class);
 
-        assertEquals(responseEntity1.getStatusCode(), HttpStatus.OK);
-        assertEquals(responseEntity2.getStatusCode(), HttpStatus.CONFLICT);
+        assertEquals(HttpStatus.OK, responseEntity1.getStatusCode());
+        assertEquals(HttpStatus.CONFLICT, responseEntity2.getStatusCode());
     }
 
     /**
@@ -112,15 +110,14 @@ public class ControllerTests {
      */
     @Test
     public void test_find_reservation() {
-        ReservationData reservationData = new ReservationData("회의실 D", "사용자 A", "Subject", 0, LocalDate.of(2019, 1, 2), LocalTime.of(10, 0), LocalTime.of(11, 0));
-
-        ResponseEntity<Void> responseEntity = restTemplate.postForEntity("/reservations", reservationData, Void.class);
+        Reservation reservation = new Reservation("회의실 D", "사용자 A", "Subject", 0, "2019-01-02", "10:00", "11:00");
+        ResponseEntity<Void> responseEntity = restTemplate.postForEntity("/reservations", reservation, Void.class);
         assertEquals(responseEntity.getStatusCode(), HttpStatus.OK);
 
-        List<ReservationData> reservationDataList = Arrays.asList(restTemplate.getForObject("/reservations?year=2019&month=1&day=2", ReservationData[].class));
-        assertEquals(reservationDataList.size(), 1);
-        reservationData.setId(reservationDataList.get(0).getId());
-        assertEquals(reservationData, reservationDataList.get(0));
+        List<Reservation> reservationList = Arrays.asList(restTemplate.getForObject("/reservations?year=2019&month=1&day=2", Reservation[].class));
+        assertEquals(1, reservationList.size());
+        reservation.setId(reservationList.get(0).getId());
+        assertEquals(reservation, reservationList.get(0));
     }
 
     /**
@@ -128,7 +125,7 @@ public class ControllerTests {
      */
     @Test
     public void test_find_empty_reservation() {
-        List<ReservationData> reservationDataList = Arrays.asList(restTemplate.getForObject("/reservations?year=2018&month=1&day=1", ReservationData[].class));
+        List<Reservation> reservationDataList = Arrays.asList(restTemplate.getForObject("/reservations?year=2018&month=1&day=1", Reservation[].class));
         assertTrue(reservationDataList.isEmpty());
     }
 
@@ -137,17 +134,16 @@ public class ControllerTests {
      */
     @Test
     public void test_cancel_reservation() {
-        ReservationData reservationData = new ReservationData("회의실 D", "사용자 A", "Subject", 0, LocalDate.of(2019, 1, 3), LocalTime.of(10, 0), LocalTime.of(11, 0));
+        Reservation reservation = new Reservation("회의실 D", "사용자 A", "Subject", 0, "2019-01-03", "10:00", "11:00");
+        ResponseEntity<Void> responseEntity = restTemplate.postForEntity("/reservations", reservation, Void.class);
+        assertEquals(HttpStatus.OK, responseEntity.getStatusCode());
 
-        ResponseEntity<Void> responseEntity1 = restTemplate.postForEntity("/reservations", reservationData, Void.class);
-        assertEquals(responseEntity1.getStatusCode(), HttpStatus.OK);
-
-        List<ReservationData> reservationDataList1 = Arrays.asList(restTemplate.getForObject("/reservations?year=2019&month=1&day=3", ReservationData[].class));
-        assertEquals(reservationDataList1.size(), 1);
+        List<Reservation> reservationDataList1 = Arrays.asList(restTemplate.getForObject("/reservations?year=2019&month=1&day=3", Reservation[].class));
+        assertEquals(1, reservationDataList1.size());
 
         restTemplate.delete("/reservations/" + reservationDataList1.get(0).getId());
 
-        List<ReservationData> reservationDataList2 = Arrays.asList(restTemplate.getForObject("/reservations?year=2019&month=1&day=3", ReservationData[].class));
+        List<Reservation> reservationDataList2 = Arrays.asList(restTemplate.getForObject("/reservations?year=2019&month=1&day=3", Reservation[].class));
         assertTrue(reservationDataList2.isEmpty());
     }
 }
