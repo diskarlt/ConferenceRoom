@@ -4,7 +4,7 @@
 <html>
 <head lang="en">
     <meta charset="UTF-8"/>
-    <title>URL Shortener</title>
+    <title>Conference Room</title>
     <link rel="stylesheet" href="/main.css" />
 </head>
 <body>

@@ -26,7 +26,7 @@ public class RepositoryTests {
     @Test
     public void test_create_onetime_reservation() {
         // 예약 등록
-        Reservation request = new Reservation("회의실 A", "사용자 A", "Subject", 0, "2019-01-01", "10:30", "11:30");
+        Reservation request = new Reservation("회의실 A", "사용자 A", 0, "2019-01-01", "13:30", "14:30");
         ReservationData reservationData = new ReservationData(request);
         reservationRepository.save(reservationData);
 
@@ -43,7 +43,7 @@ public class RepositoryTests {
     @Test
     public void test_create_repeat_reservation() {
         // 예약 등록
-        Reservation request = new Reservation("회의실 A", "사용자 A", "Subject", 3, "2019-01-01", "10:30", "11:30");
+        Reservation request = new Reservation("회의실 A", "사용자 A", 3, "2019-01-01", "10:30", "11:30");
         ReservationData reservationData = new ReservationData(request);
         reservationRepository.save(reservationData);
 
@@ -78,7 +78,7 @@ public class RepositoryTests {
         LocalTime endTime = LocalTime.of(11, 30);
 
         // 예약 등록
-        Reservation request = new Reservation("회의실 A", "사용자 A", "Subject", 3, "2019-01-01", "10:00", "11:30");
+        Reservation request = new Reservation("회의실 A", "사용자 A", 3, "2019-01-01", "10:00", "11:30");
         ReservationData reservationData = new ReservationData(request);
         reservationRepository.save(reservationData);
 
@@ -121,7 +121,7 @@ public class RepositoryTests {
         LocalTime endTime = LocalTime.of(11, 30);
 
         // 예약 등록
-        Reservation request = new Reservation("회의실 A", "사용자 A", "Subject", 3, "2019-01-01", "10:00", "11:30");
+        Reservation request = new Reservation("회의실 A", "사용자 A", 3, "2019-01-01", "10:00", "11:30");
         ReservationData reservationData = new ReservationData(request);
         reservationRepository.save(reservationData);
 

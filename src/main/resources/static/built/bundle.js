@@ -34897,6 +34897,10 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony import */ var reactstrap__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! reactstrap */ "../../../node_modules/reactstrap/dist/reactstrap.es.js");
 function _typeof(obj) { if (typeof Symbol === "function" && typeof Symbol.iterator === "symbol") { _typeof = function _typeof(obj) { return typeof obj; }; } else { _typeof = function _typeof(obj) { return obj && typeof Symbol === "function" && obj.constructor === Symbol && obj !== Symbol.prototype ? "symbol" : typeof obj; }; } return _typeof(obj); }
 
+function _objectSpread(target) { for (var i = 1; i < arguments.length; i++) { var source = arguments[i] != null ? arguments[i] : {}; var ownKeys = Object.keys(source); if (typeof Object.getOwnPropertySymbols === 'function') { ownKeys = ownKeys.concat(Object.getOwnPropertySymbols(source).filter(function (sym) { return Object.getOwnPropertyDescriptor(source, sym).enumerable; })); } ownKeys.forEach(function (key) { _defineProperty(target, key, source[key]); }); } return target; }
+
+function _defineProperty(obj, key, value) { if (key in obj) { Object.defineProperty(obj, key, { value: value, enumerable: true, configurable: true, writable: true }); } else { obj[key] = value; } return obj; }
+
 function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
 
 function _defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } }
@@ -34917,24 +34921,358 @@ function _setPrototypeOf(o, p) { _setPrototypeOf = Object.setPrototypeOf || func
 
 
 
+var navStyle = {
+  position: 'fixed',
+  height: '56px',
+  width: '100%',
+  backgroundColor: '#423630',
+  zIndex: '1'
+};
+var tableHeaderStyle = {
+  position: 'fixed',
+  width: '100%',
+  backgroundColor: 'white',
+  marginTop: '56px',
+  zIndex: '1'
+};
+var tableBodyStyle = {
+  paddingTop: '125px'
+};
+var reservationStyle = {
+  backgroundColor: '#ffc107',
+  padding: '10px',
+  borderLeft: '1px solid #dee2e6'
+};
+var datePickerStyle = {
+  maxWidth: '150px',
+  width: '150px',
+  padding: '15px 10px',
+  verticalAlign: 'bottom',
+  textAlign: 'center',
+  borderBottom: '1px solid #dee2e6'
+};
+var roomListStyle = {
+  padding: '20px 0px 20px 0px',
+  verticalAlign: 'bottom',
+  textAlign: 'center',
+  borderBottom: '1px solid #dee2e6'
+};
+var timeRangeStyle = {
+  maxWidth: '150px',
+  width: '150px',
+  textAlign: 'center',
+  padding: '0.75rem',
+  borderTop: '1px solid #dee2e6'
+};
+var timeLineStyle = {
+  borderTop: '1px solid #dee2e6',
+  padding: '10px',
+  borderLeft: '1px solid #dee2e6'
+};
+
+var ReservationBoard =
+/*#__PURE__*/
+function (_React$Component) {
+  _inherits(ReservationBoard, _React$Component);
+
+  function ReservationBoard() {
+    _classCallCheck(this, ReservationBoard);
+
+    return _possibleConstructorReturn(this, _getPrototypeOf(ReservationBoard).apply(this, arguments));
+  }
+
+  _createClass(ReservationBoard, [{
+    key: "render",
+    value: function render() {
+      var _this = this;
+
+      var roomNames = ["회의실 A", "회의실 B", "회의실 C", "회의실 D", "회의실 E", "회의실 F", "회의실 G"];
+      var listRooms = roomNames.map(function (roomName, index) {
+        return react__WEBPACK_IMPORTED_MODULE_1___default.a.createElement(reactstrap__WEBPACK_IMPORTED_MODULE_3__["Col"], {
+          className: 'font-weight-bold',
+          style: roomListStyle,
+          key: index
+        }, roomName);
+      });
+      var TableHeader = react__WEBPACK_IMPORTED_MODULE_1___default.a.createElement(reactstrap__WEBPACK_IMPORTED_MODULE_3__["Row"], {
+        style: {
+          width: "100%"
+        }
+      }, react__WEBPACK_IMPORTED_MODULE_1___default.a.createElement(reactstrap__WEBPACK_IMPORTED_MODULE_3__["Col"], {
+        style: datePickerStyle
+      }, react__WEBPACK_IMPORTED_MODULE_1___default.a.createElement(reactstrap__WEBPACK_IMPORTED_MODULE_3__["Input"], {
+        name: "date",
+        value: this.props.date,
+        onChange: this.props.onChange
+      })), listRooms);
+      var timeRanges = [];
+
+      for (var i = 0; i < 48; ++i) {
+        var timeRange = "";
+        timeRange += parseInt(i / 2) + ":" + (i % 2 ? "30" : "00") + " ~ " + parseInt((i + 1) / 2) + ":" + (i % 2 ? "00" : "30");
+        timeRanges.push(timeRange);
+      }
+
+      var TableBody = timeRanges.map(function (timeRange, index) {
+        return react__WEBPACK_IMPORTED_MODULE_1___default.a.createElement(reactstrap__WEBPACK_IMPORTED_MODULE_3__["Row"], {
+          key: index
+        }, react__WEBPACK_IMPORTED_MODULE_1___default.a.createElement(reactstrap__WEBPACK_IMPORTED_MODULE_3__["Col"], {
+          key: timeRange.toString,
+          className: 'font-weight-bold',
+          style: timeRangeStyle
+        }, timeRange), roomNames.map(function (roomName) {
+          var ret = react__WEBPACK_IMPORTED_MODULE_1___default.a.createElement(reactstrap__WEBPACK_IMPORTED_MODULE_3__["Col"], {
+            style: timeLineStyle
+          });
+          Array.prototype.forEach.call(_this.props.reservations, function (reservation) {
+            var startTime = (parseInt(index / 2) < 10 ? "0" : "") + parseInt(index / 2) + ":" + (index % 2 ? "30" : "00");
+            var endTime = (parseInt((index + 1) / 2) < 10 ? "0" : "") + parseInt((index + 1) / 2) + ":" + (index % 2 ? "00" : "30");
+
+            if (reservation.roomName === roomName && reservation.startTime <= startTime && reservation.endTime >= endTime) {
+              if (reservation.startTime === startTime) {
+                ret = react__WEBPACK_IMPORTED_MODULE_1___default.a.createElement(reactstrap__WEBPACK_IMPORTED_MODULE_3__["Col"], {
+                  className: "font-weight-bold",
+                  style: reservationStyle
+                }, react__WEBPACK_IMPORTED_MODULE_1___default.a.createElement(reactstrap__WEBPACK_IMPORTED_MODULE_3__["Button"], {
+                  id: reservation.id,
+                  onClick: function onClick() {
+                    return _this.props.onCancel(reservation.id);
+                  },
+                  close: true
+                }), reservation.repeat ? react__WEBPACK_IMPORTED_MODULE_1___default.a.createElement("div", null, "(\uBC18\uBCF5 ", reservation.repeat, "\uD68C)") : null, react__WEBPACK_IMPORTED_MODULE_1___default.a.createElement("div", null, reservation.userName), react__WEBPACK_IMPORTED_MODULE_1___default.a.createElement("div", null, reservation.startTime, " ~ ", reservation.endTime));
+              } else {
+                ret = react__WEBPACK_IMPORTED_MODULE_1___default.a.createElement(reactstrap__WEBPACK_IMPORTED_MODULE_3__["Col"], {
+                  className: "font-weight-bold",
+                  style: _objectSpread({}, reservationStyle, {
+                    borderTop: '0'
+                  })
+                });
+              }
+            }
+          });
+          return ret;
+        }));
+      });
+      return react__WEBPACK_IMPORTED_MODULE_1___default.a.createElement(reactstrap__WEBPACK_IMPORTED_MODULE_3__["Container"], {
+        style: {
+          maxWidth: "100%"
+        }
+      }, react__WEBPACK_IMPORTED_MODULE_1___default.a.createElement("div", {
+        style: tableHeaderStyle
+      }, TableHeader), react__WEBPACK_IMPORTED_MODULE_1___default.a.createElement("div", {
+        style: tableBodyStyle
+      }, TableBody));
+    }
+  }]);
+
+  return ReservationBoard;
+}(react__WEBPACK_IMPORTED_MODULE_1___default.a.Component);
 
 var App =
 /*#__PURE__*/
-function (_React$Component) {
-  _inherits(App, _React$Component);
+function (_React$Component2) {
+  _inherits(App, _React$Component2);
+
+  _createClass(App, [{
+    key: "componentDidUpdate",
+    value: function componentDidUpdate() {
+      window.scrollTo(0, 850);
+    }
+  }]);
 
   function App() {
+    var _this2;
+
     _classCallCheck(this, App);
 
-    return _possibleConstructorReturn(this, _getPrototypeOf(App).apply(this, arguments));
+    _this2 = _possibleConstructorReturn(this, _getPrototypeOf(App).call(this));
+    _this2.toggle = _this2.toggle.bind(_assertThisInitialized(_assertThisInitialized(_this2)));
+    _this2.handleChange = _this2.handleChange.bind(_assertThisInitialized(_assertThisInitialized(_this2)));
+    _this2.handleSubmit = _this2.handleSubmit.bind(_assertThisInitialized(_assertThisInitialized(_this2)));
+    _this2.handleCancel = _this2.handleCancel.bind(_assertThisInitialized(_assertThisInitialized(_this2)));
+    var todayDate = new Date().toISOString().slice(0, 10);
+    _this2.state = {
+      roomName: "회의실 A",
+      userName: "",
+      date: todayDate,
+      repeat: 0,
+      startTime: "",
+      endTime: "",
+      modal: false,
+      reservations: {}
+    };
+    _this2.getReservationData = _this2.getReservationData.bind(_assertThisInitialized(_assertThisInitialized(_this2)));
+    return _this2;
   }
 
   _createClass(App, [{
+    key: "getReservationData",
+    value: function getReservationData(date) {
+      var _this3 = this;
+
+      var year = date.slice(0, 4);
+      var month = date.slice(5, 7);
+      var day = date.slice(8);
+      var url = 'http://localhost:8080/reservations';
+      url += '?year=' + year;
+      url += '&month=' + month;
+      url += '&day=' + day;
+      fetch(url, {
+        method: 'GET',
+        mode: 'cors',
+        headers: {
+          'Content-Type': 'application/json'
+        }
+      }).then(function (response) {
+        return response.json();
+      }).then(function (data) {
+        _this3.setState({
+          reservations: data
+        });
+      });
+    }
+  }, {
+    key: "componentDidMount",
+    value: function componentDidMount() {
+      this.getReservationData(this.state.date);
+    }
+  }, {
+    key: "handleChange",
+    value: function handleChange(e) {
+      this.setState(_defineProperty({}, e.target.name, e.target.value));
+
+      if (e.target.name === "date") {
+        if (e.target.value.match("[0-9][0-9][0-9][0-9]-[0-1][0-9]-[0-3][0-9]")) this.getReservationData(e.target.value);
+      }
+    }
+  }, {
+    key: "handleSubmit",
+    value: function handleSubmit(e) {
+      var _this4 = this;
+
+      e.preventDefault();
+      var req = {
+        "roomName": this.state.roomName,
+        "userName": this.state.userName,
+        "date": this.state.date,
+        "repeat": this.state.repeat,
+        "startTime": this.state.startTime,
+        "endTime": this.state.endTime
+      };
+      fetch('http://localhost:8080/reservations', {
+        method: 'POST',
+        mode: 'cors',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify(req)
+      }).then(function (response) {
+        if (response.status === 200) alert("예약이 완료되었습니다.");else alert("예약이 실패하였습니다.");
+
+        _this4.getReservationData(_this4.state.date);
+      });
+    }
+  }, {
+    key: "handleCancel",
+    value: function handleCancel(id) {
+      var _this5 = this;
+
+      fetch('http://localhost:8080/reservations/' + id, {
+        method: 'DELETE',
+        mode: 'cors'
+      }).then(function () {
+        _this5.getReservationData(_this5.state.date);
+      });
+    }
+  }, {
+    key: "toggle",
+    value: function toggle() {
+      this.setState({
+        modal: !this.state.modal
+      });
+    }
+  }, {
     key: "render",
     value: function render() {
       return react__WEBPACK_IMPORTED_MODULE_1___default.a.createElement("div", {
         className: "main"
-      }, "Hello world");
+      }, react__WEBPACK_IMPORTED_MODULE_1___default.a.createElement("div", {
+        style: navStyle
+      }, react__WEBPACK_IMPORTED_MODULE_1___default.a.createElement(reactstrap__WEBPACK_IMPORTED_MODULE_3__["Navbar"], {
+        dark: true,
+        expand: "md"
+      }, react__WEBPACK_IMPORTED_MODULE_1___default.a.createElement(reactstrap__WEBPACK_IMPORTED_MODULE_3__["NavbarBrand"], {
+        href: "/"
+      }, "\uD68C\uC758\uC2E4"), react__WEBPACK_IMPORTED_MODULE_1___default.a.createElement(reactstrap__WEBPACK_IMPORTED_MODULE_3__["Nav"], {
+        className: "ml-auto",
+        navbar: true
+      }, react__WEBPACK_IMPORTED_MODULE_1___default.a.createElement(reactstrap__WEBPACK_IMPORTED_MODULE_3__["Button"], {
+        outline: true,
+        color: "warning",
+        onClick: this.toggle
+      }, "\uC608\uC57D\uD558\uAE30")), react__WEBPACK_IMPORTED_MODULE_1___default.a.createElement(reactstrap__WEBPACK_IMPORTED_MODULE_3__["Modal"], {
+        isOpen: this.state.modal,
+        toggle: this.toggle,
+        className: this.props.className
+      }, react__WEBPACK_IMPORTED_MODULE_1___default.a.createElement(reactstrap__WEBPACK_IMPORTED_MODULE_3__["Form"], {
+        onSubmit: this.handleSubmit
+      }, react__WEBPACK_IMPORTED_MODULE_1___default.a.createElement(reactstrap__WEBPACK_IMPORTED_MODULE_3__["FormGroup"], null, react__WEBPACK_IMPORTED_MODULE_1___default.a.createElement(reactstrap__WEBPACK_IMPORTED_MODULE_3__["ModalHeader"], {
+        toggle: this.toggle
+      }, "\uD68C\uC758\uC2E4 \uC608\uC57D"), react__WEBPACK_IMPORTED_MODULE_1___default.a.createElement(reactstrap__WEBPACK_IMPORTED_MODULE_3__["ModalBody"], null, react__WEBPACK_IMPORTED_MODULE_1___default.a.createElement(reactstrap__WEBPACK_IMPORTED_MODULE_3__["Label"], {
+        for: "roomName"
+      }, "\uD68C\uC758\uC2E4"), react__WEBPACK_IMPORTED_MODULE_1___default.a.createElement(reactstrap__WEBPACK_IMPORTED_MODULE_3__["Input"], {
+        type: "select",
+        name: "roomName",
+        value: this.state.roomName,
+        onChange: this.handleChange
+      }, react__WEBPACK_IMPORTED_MODULE_1___default.a.createElement("option", null, "\uD68C\uC758\uC2E4 A"), react__WEBPACK_IMPORTED_MODULE_1___default.a.createElement("option", null, "\uD68C\uC758\uC2E4 B"), react__WEBPACK_IMPORTED_MODULE_1___default.a.createElement("option", null, "\uD68C\uC758\uC2E4 C"), react__WEBPACK_IMPORTED_MODULE_1___default.a.createElement("option", null, "\uD68C\uC758\uC2E4 D"), react__WEBPACK_IMPORTED_MODULE_1___default.a.createElement("option", null, "\uD68C\uC758\uC2E4 E"), react__WEBPACK_IMPORTED_MODULE_1___default.a.createElement("option", null, "\uD68C\uC758\uC2E4 F"), react__WEBPACK_IMPORTED_MODULE_1___default.a.createElement("option", null, "\uD68C\uC758\uC2E4 G")), react__WEBPACK_IMPORTED_MODULE_1___default.a.createElement(reactstrap__WEBPACK_IMPORTED_MODULE_3__["Label"], {
+        for: "userName"
+      }, "\uC608\uC57D\uC790\uBA85"), react__WEBPACK_IMPORTED_MODULE_1___default.a.createElement(reactstrap__WEBPACK_IMPORTED_MODULE_3__["Input"], {
+        name: "userName",
+        value: this.state.userName,
+        onChange: this.handleChange,
+        placeholder: "\uC608\uC57D\uC790\uBA85"
+      }), react__WEBPACK_IMPORTED_MODULE_1___default.a.createElement(reactstrap__WEBPACK_IMPORTED_MODULE_3__["Label"], {
+        for: "date"
+      }, "\uC608\uC57D\uC77C\uC790"), react__WEBPACK_IMPORTED_MODULE_1___default.a.createElement(reactstrap__WEBPACK_IMPORTED_MODULE_3__["Input"], {
+        name: "date",
+        value: this.state.date,
+        onChange: this.handleChange,
+        placeholder: "\uC608\uC57D\uC77C\uC790"
+      }), react__WEBPACK_IMPORTED_MODULE_1___default.a.createElement(reactstrap__WEBPACK_IMPORTED_MODULE_3__["Label"], {
+        for: "startTime"
+      }, "\uC2DC\uC791\uC2DC\uAC04"), react__WEBPACK_IMPORTED_MODULE_1___default.a.createElement(reactstrap__WEBPACK_IMPORTED_MODULE_3__["Input"], {
+        name: "startTime",
+        value: this.state.startTime,
+        onChange: this.handleChange,
+        placeholder: "\uC2DC\uC791\uC2DC\uAC04"
+      }), react__WEBPACK_IMPORTED_MODULE_1___default.a.createElement(reactstrap__WEBPACK_IMPORTED_MODULE_3__["Label"], {
+        for: "endTime"
+      }, "\uC885\uB8CC\uC2DC\uAC04"), react__WEBPACK_IMPORTED_MODULE_1___default.a.createElement(reactstrap__WEBPACK_IMPORTED_MODULE_3__["Input"], {
+        name: "endTime",
+        value: this.state.endTime,
+        onChange: this.handleChange,
+        placeholder: "\uC885\uB8CC\uC2DC\uAC04"
+      }), react__WEBPACK_IMPORTED_MODULE_1___default.a.createElement(reactstrap__WEBPACK_IMPORTED_MODULE_3__["Label"], {
+        for: "repeat"
+      }, "\uBC18\uBCF5\uD558\uAE30"), react__WEBPACK_IMPORTED_MODULE_1___default.a.createElement(reactstrap__WEBPACK_IMPORTED_MODULE_3__["Input"], {
+        name: "repeat",
+        value: this.state.repeat,
+        onChange: this.handleChange,
+        placeholder: "\uBC18\uBCF5\uD69F\uC218"
+      })), react__WEBPACK_IMPORTED_MODULE_1___default.a.createElement(reactstrap__WEBPACK_IMPORTED_MODULE_3__["ModalFooter"], null, react__WEBPACK_IMPORTED_MODULE_1___default.a.createElement(reactstrap__WEBPACK_IMPORTED_MODULE_3__["Button"], {
+        type: "submit",
+        color: "primary",
+        onClick: this.toggle
+      }, "\uC608\uC57D"), ' ', react__WEBPACK_IMPORTED_MODULE_1___default.a.createElement(reactstrap__WEBPACK_IMPORTED_MODULE_3__["Button"], {
+        color: "secondary",
+        onClick: this.toggle
+      }, "\uCDE8\uC18C"))))))), react__WEBPACK_IMPORTED_MODULE_1___default.a.createElement(ReservationBoard, {
+        date: this.state.date,
+        onChange: this.handleChange,
+        onCancel: this.handleCancel,
+        reservations: this.state.reservations
+      }));
     }
   }]);
 

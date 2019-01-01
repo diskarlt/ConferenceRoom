@@ -28,7 +28,7 @@ public class ControllerTests {
      */
     @Test
     public void test_create_onetime_reservation() {
-        Reservation reservation = new Reservation("회의실 A", "사용자 A", "Subject", 0, "2019-01-01", "10:00", "10:30");
+        Reservation reservation = new Reservation("회의실 A", "사용자 A", 0, "2019-01-01", "10:00", "10:30");
         ResponseEntity<Void> responseEntity = restTemplate.postForEntity("/reservations", reservation, Void.class);
         assertEquals(HttpStatus.OK, responseEntity.getStatusCode());
     }
@@ -38,7 +38,7 @@ public class ControllerTests {
      * 예약 : 10:30~11:00, 3회 추가 반복 (성공)
      */
     @Test public void test_create_repeat_reservation() {
-        Reservation reservation = new Reservation("회의실 A", "사용자 A", "Subject", 0, "2019-01-01", "10:30", "11:00");
+        Reservation reservation = new Reservation("회의실 A", "사용자 A", 0, "2019-01-01", "10:30", "11:00");
         ResponseEntity<Void> responseEntity = restTemplate.postForEntity("/reservations", reservation, Void.class);
         assertEquals(HttpStatus.OK, responseEntity.getStatusCode());
     }
@@ -50,8 +50,8 @@ public class ControllerTests {
      */
     @Test
     public void test_create_bad_time_reservation() {
-        Reservation reservation1 = new Reservation("회의실 A", "사용자 A", "Subject", 0, "2019-01-01", "09:20", "10:00");
-        Reservation reservation2 = new Reservation("회의실 A", "사용자 A", "Subject", 0, "2019-01-01", "09:30", "11:10");
+        Reservation reservation1 = new Reservation("회의실 A", "사용자 A", 0, "2019-01-01", "09:20", "10:00");
+        Reservation reservation2 = new Reservation("회의실 A", "사용자 A", 0, "2019-01-01", "09:30", "11:10");
 
         ResponseEntity<Void> responseEntity1 = restTemplate.postForEntity("/reservations", reservation1, Void.class);
         ResponseEntity<Void> responseEntity2 = restTemplate.postForEntity("/reservations", reservation2, Void.class);
@@ -66,7 +66,7 @@ public class ControllerTests {
      */
     @Test
     public void test_create_start_time_after_end_time_reservation() {
-        Reservation reservation = new Reservation("회의실 A", "사용자 A", "Subject", 0, "2019-01-01", "10:00", "09:00");
+        Reservation reservation = new Reservation("회의실 A", "사용자 A", 0, "2019-01-01", "10:00", "09:00");
         ResponseEntity<Void> responseEntity = restTemplate.postForEntity("/reservations", reservation, Void.class);
         assertEquals(HttpStatus.BAD_REQUEST, responseEntity.getStatusCode());
     }
@@ -78,8 +78,8 @@ public class ControllerTests {
      */
     @Test
     public void test_create_continual_time_reservation() {
-        Reservation reservation1 = new Reservation("회의실 B", "사용자 A", "Subject", 0, "2019-01-01", "10:00", "11:00");
-        Reservation reservation2 = new Reservation("회의실 B", "사용자 A", "Subject", 0, "2019-01-01", "11:00", "12:00");
+        Reservation reservation1 = new Reservation("회의실 B", "사용자 A", 0, "2019-01-01", "10:00", "11:00");
+        Reservation reservation2 = new Reservation("회의실 B", "사용자 A", 0, "2019-01-01", "11:00", "12:00");
 
         ResponseEntity<Void> responseEntity1 = restTemplate.postForEntity("/reservations", reservation1, Void.class);
         ResponseEntity<Void> responseEntity2 = restTemplate.postForEntity("/reservations", reservation2, Void.class);
@@ -95,8 +95,8 @@ public class ControllerTests {
      */
     @Test
     public void test_create_conflict_reservation() {
-        Reservation reservation1 = new Reservation("회의실 C", "사용자 A", "Subject", 0, "2019-01-01", "10:00", "11:00");
-        Reservation reservation2 = new Reservation("회의실 C", "사용자 B", "Subject", 0, "2019-01-01", "09:00", "10:30");
+        Reservation reservation1 = new Reservation("회의실 C", "사용자 A", 0, "2019-01-01", "10:00", "11:00");
+        Reservation reservation2 = new Reservation("회의실 C", "사용자 B", 0, "2019-01-01", "09:00", "10:30");
 
         ResponseEntity<Void> responseEntity1 = restTemplate.postForEntity("/reservations", reservation1, Void.class);
         ResponseEntity<Void> responseEntity2 = restTemplate.postForEntity("/reservations", reservation2, Void.class);
@@ -110,7 +110,7 @@ public class ControllerTests {
      */
     @Test
     public void test_find_reservation() {
-        Reservation reservation = new Reservation("회의실 D", "사용자 A", "Subject", 0, "2019-01-02", "10:00", "11:00");
+        Reservation reservation = new Reservation("회의실 D", "사용자 A", 0, "2019-01-02", "10:00", "11:00");
         ResponseEntity<Void> responseEntity = restTemplate.postForEntity("/reservations", reservation, Void.class);
         assertEquals(responseEntity.getStatusCode(), HttpStatus.OK);
 
@@ -134,7 +134,7 @@ public class ControllerTests {
      */
     @Test
     public void test_cancel_reservation() {
-        Reservation reservation = new Reservation("회의실 D", "사용자 A", "Subject", 0, "2019-01-03", "10:00", "11:00");
+        Reservation reservation = new Reservation("회의실 D", "사용자 A", 0, "2019-01-03", "10:00", "11:00");
         ResponseEntity<Void> responseEntity = restTemplate.postForEntity("/reservations", reservation, Void.class);
         assertEquals(HttpStatus.OK, responseEntity.getStatusCode());
 

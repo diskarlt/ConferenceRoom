@@ -24,4 +24,13 @@ public interface ReservationRepository extends CrudRepository<ReservationData, L
             "      e.endDate >= :date and " +
             "      e.dayOfWeek = :dayOfWeek")
     List<ReservationData> findAllByDateAndDayOfWeek(@Param("date") LocalDate date, @Param("dayOfWeek") DayOfWeek dayOfWeek);
+
+    @Query("select case when count(e)>0 then true else false end " +
+            "from ReservationData e " +
+            "where e.roomName = :roomName and " +
+            "      e.startDate <= :endDate and e.endDate >= :startDate and " +
+            "      e.dayOfWeek = :dayOfWeek and " +
+            "      e.startTime < :endTime and e.endTime > :startTime and " +
+            "      e.id != :id")
+    boolean isConflictExcludeSelf(Long id, @Param("roomName") String roomName, @Param("startDate") LocalDate startDate, @Param("endDate") LocalDate endDate, @Param("dayOfWeek") DayOfWeek dayOfWeek, @Param("startTime") LocalTime startTime, @Param("endTime") LocalTime endTime);
 }

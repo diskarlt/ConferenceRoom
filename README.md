@@ -21,6 +21,5 @@ mvnw package
 
 ## Run
 ``` bash
-cd target
-java -jar conference_room-1.0-SNAPSHOT.jar
+java -jar target/conference_room-1.0-SNAPSHOT.jar
 ```

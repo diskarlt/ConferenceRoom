@@ -10,8 +10,8 @@ import java.time.LocalDate;
 import java.time.LocalTime;
 
 @Entity
-@Data
 @RequiredArgsConstructor
+@Data
 @Table(indexes = {@Index(columnList = "roomName, startDate, endDate, dayOfWeek, startTime, endTime")})
 public class ReservationData {
     @Id
@@ -22,8 +22,6 @@ public class ReservationData {
     private String roomName;
     @NonNull
     private String userName;
-    @NonNull
-    private String subject;
     @NonNull
     private int repeat;
 
@@ -56,7 +54,6 @@ public class ReservationData {
 
         this.roomName = req.getRoomName();
         this.userName = req.getUserName();
-        this.subject = req.getSubject();
         this.repeat = req.getRepeat();
         this.dayOfWeek = date.getDayOfWeek();
         this.startDate = date;
