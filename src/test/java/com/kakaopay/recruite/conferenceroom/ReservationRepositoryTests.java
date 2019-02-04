@@ -1,0 +1,142 @@
+package com.kakaopay.recruite.conferenceroom;
+
+import com.kakaopay.recruite.conferenceroom.dao.ReservationDao;
+import com.kakaopay.recruite.conferenceroom.dao.ReservationStatusDao;
+import com.kakaopay.recruite.conferenceroom.dao.RoomDao;
+import com.kakaopay.recruite.conferenceroom.dao.UserDao;
+import com.kakaopay.recruite.conferenceroom.repository.ReservationRepository;
+import com.kakaopay.recruite.conferenceroom.repository.ReservationStatusRepository;
+import com.kakaopay.recruite.conferenceroom.repository.RoomRepository;
+import com.kakaopay.recruite.conferenceroom.repository.UserRepository;
+import lombok.extern.slf4j.Slf4j;
+import org.junit.Before;
+import org.junit.BeforeClass;
+import org.junit.Test;
+import org.junit.runner.RunWith;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
+import org.springframework.test.context.junit4.SpringRunner;
+
+import java.time.LocalDate;
+import java.time.LocalTime;
+
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
+
+@RunWith(SpringRunner.class)
+@DataJpaTest
+@Slf4j
+public class ReservationRepositoryTests {
+    @Autowired
+    private ReservationRepository reservationRepository;
+    @Autowired
+    private ReservationStatusRepository reservationStatusRepository;
+    @Autowired
+    private UserRepository userRepository;
+    @Autowired
+    private RoomRepository roomRepository;
+
+    Long roomId;
+    Long userId;
+
+    @Before
+    public void before() {
+        roomId = roomRepository.findAll().get(0).getId();
+        userId = userRepository.findAll().get(0).getId();
+    }
+
+    /**
+     * 1회성 예약
+     */
+    @Test
+    public void test_create_onetime_reservation() {
+        RoomDao roomDao = roomRepository.findById(roomId).orElse(null);
+        UserDao userDao = userRepository.findById(userId).orElse(null);
+
+        // 예약 등록
+        LocalDate date = LocalDate.of(2019, 1, 1);
+        ReservationDao reservationDao = ReservationDao.builder()
+                .room(roomDao)
+                .user(userDao)
+                .repeat(0)
+                .dayOfWeek(date.getDayOfWeek())
+                .startDate(date)
+                .endDate(date)
+                .startTime(LocalTime.of(13, 30))
+                .endTime(LocalTime.of(14, 30))
+                .build();
+        reservationRepository.save(reservationDao);
+
+        // 예약 조회
+        ReservationDao findReservationDao = reservationRepository.findById(reservationDao.getId()).orElse(null);
+
+        // 비교
+        assertEquals(roomDao, findReservationDao.getRoom());
+        assertEquals(userDao, findReservationDao.getUser());
+        assertEquals(reservationDao, findReservationDao);
+    }
+
+    /**
+     * 반복 예약
+     */
+    @Test
+    public void test_create_repeat_reservation() {
+        // 예약 등록
+        int repeat = 3;
+        LocalDate startDate = LocalDate.of(2019, 1, 1);
+        LocalDate endDate = startDate.plusWeeks(3);
+        LocalTime startTime = LocalTime.of(10, 30);
+        LocalTime endTime = LocalTime.of(11, 30);
+        ReservationDao reservationDao = ReservationDao.builder()
+                .repeat(repeat)
+                .dayOfWeek(startDate.getDayOfWeek())
+                .startDate(startDate)
+                .endDate(endDate)
+                .startTime(startTime)
+                .endTime(endTime)
+                .build();
+        reservationRepository.save(reservationDao);
+
+        // 예약 조회
+        ReservationDao data = reservationRepository.findById(reservationDao.getId()).orElse(null);
+
+        // 비교
+        assertEquals(reservationDao, data);
+    }
+
+    /**
+     * 예약 상태 등록
+     */
+    @Test
+    public void test_reservation_status() {
+        RoomDao roomDao = roomRepository.findById(roomId).orElse(null);
+
+        int repeat = 3;
+        LocalDate startDate = LocalDate.of(2019, 1, 1);
+        LocalDate endDate = startDate.plusWeeks(3);
+        LocalTime startTime = LocalTime.of(10, 30);
+        LocalTime endTime = LocalTime.of(11, 30);
+        ReservationDao reservationDao = ReservationDao.builder()
+                .repeat(repeat)
+                .dayOfWeek(startDate.getDayOfWeek())
+                .startDate(startDate)
+                .endDate(endDate)
+                .startTime(startTime)
+                .endTime(endTime)
+                .build();
+        reservationRepository.save(reservationDao);
+
+        for(int i=0; i<=repeat; ++i) {
+            for (LocalTime time = startTime; time.isBefore(endTime); time = time.plusMinutes(30)) {
+                ReservationStatusDao reservationStatusDao = ReservationStatusDao.builder().date(startDate.plusWeeks(i)).room(roomDao).time(time).reservation(reservationDao).build();
+                reservationStatusRepository.save(reservationStatusDao);
+            }
+        }
+
+        for(int i=0; i<=repeat; ++i) {
+            for (LocalTime time = startTime; time.isBefore(endTime); time = time.plusMinutes(30)) {
+                assertTrue(reservationStatusRepository.existsByRoom_IdAndDateAndTime(roomDao.getId(), startDate.plusWeeks(i), time));
+            }
+        }
+    }
+}
