@@ -1,6 +1,6 @@
 package com.kakaopay.recruite.conferenceroom.service;
 
-import com.kakaopay.recruite.conferenceroom.dao.RoomDao;
+import com.kakaopay.recruite.conferenceroom.domain.Room;
 import com.kakaopay.recruite.conferenceroom.dto.RoomDto;
 import com.kakaopay.recruite.conferenceroom.repository.RoomRepository;
 import lombok.extern.slf4j.Slf4j;
@@ -18,12 +18,12 @@ public class RoomService {
     RoomRepository roomRepository;
 
     public void createRoom(RoomDto roomDto) {
-        RoomDao roomDao = RoomDao.builder().roomName(roomDto.getRoomName()).build();
-        roomRepository.save(roomDao);
-        roomDto.setId(roomDao.getId());
+        Room room = Room.builder().roomName(roomDto.getRoomName()).build();
+        roomRepository.save(room);
+        roomDto.setId(room.getId());
     }
 
-    public Optional<RoomDao> findRoom(Long id) {
+    public Optional<Room> findRoom(Long id) {
         return roomRepository.findById(id);
     }
 

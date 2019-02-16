@@ -1,4 +1,4 @@
-package com.kakaopay.recruite.conferenceroom.dao;
+package com.kakaopay.recruite.conferenceroom.domain;
 
 import lombok.Builder;
 import lombok.Data;
@@ -11,7 +11,7 @@ import javax.persistence.*;
 @Table(uniqueConstraints={
         @UniqueConstraint(columnNames = {"roomName"})
 })
-public class RoomDao {
+public class Room {
     @Id @GeneratedValue
     @Column(name = "ROOM_ID")
     private Long id;

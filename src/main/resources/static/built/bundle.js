@@ -34949,7 +34949,8 @@ var datePickerStyle = {
   padding: '15px 10px',
   verticalAlign: 'bottom',
   textAlign: 'center',
-  borderBottom: '1px solid #dee2e6'
+  borderBottom: '1px solid #dee2e6',
+  backgroundColor: 'white'
 };
 var roomListStyle = {
   padding: '20px 0px 20px 0px',
@@ -34986,13 +34987,12 @@ function (_React$Component) {
     value: function render() {
       var _this = this;
 
-      var roomNames = ["회의실 A", "회의실 B", "회의실 C", "회의실 D", "회의실 E", "회의실 F", "회의실 G"];
-      var listRooms = roomNames.map(function (roomName, index) {
+      var listRooms = this.props.rooms.map(function (room, index) {
         return react__WEBPACK_IMPORTED_MODULE_1___default.a.createElement(reactstrap__WEBPACK_IMPORTED_MODULE_3__["Col"], {
           className: 'font-weight-bold',
           style: roomListStyle,
           key: index
-        }, roomName);
+        }, room.roomName);
       });
       var TableHeader = react__WEBPACK_IMPORTED_MODULE_1___default.a.createElement(reactstrap__WEBPACK_IMPORTED_MODULE_3__["Row"], {
         style: {
@@ -35020,7 +35020,7 @@ function (_React$Component) {
           key: timeRange.toString,
           className: 'font-weight-bold',
           style: timeRangeStyle
-        }, timeRange), roomNames.map(function (roomName) {
+        }, timeRange), _this.props.rooms.map(function (room) {
           var ret = react__WEBPACK_IMPORTED_MODULE_1___default.a.createElement(reactstrap__WEBPACK_IMPORTED_MODULE_3__["Col"], {
             style: timeLineStyle
           });
@@ -35028,7 +35028,7 @@ function (_React$Component) {
             var startTime = (parseInt(index / 2) < 10 ? "0" : "") + parseInt(index / 2) + ":" + (index % 2 ? "30" : "00");
             var endTime = (parseInt((index + 1) / 2) < 10 ? "0" : "") + parseInt((index + 1) / 2) + ":" + (index % 2 ? "00" : "30");
 
-            if (reservation.roomName === roomName && reservation.startTime <= startTime && reservation.endTime >= endTime) {
+            if (reservation.room.id === room.id && reservation.startTime <= startTime && reservation.endTime >= endTime) {
               if (reservation.startTime === startTime) {
                 ret = react__WEBPACK_IMPORTED_MODULE_1___default.a.createElement(reactstrap__WEBPACK_IMPORTED_MODULE_3__["Col"], {
                   className: "font-weight-bold",
@@ -35086,47 +35086,74 @@ function (_React$Component2) {
     _classCallCheck(this, App);
 
     _this2 = _possibleConstructorReturn(this, _getPrototypeOf(App).call(this));
+    _this2.login = _this2.login.bind(_assertThisInitialized(_assertThisInitialized(_this2)));
     _this2.toggle = _this2.toggle.bind(_assertThisInitialized(_assertThisInitialized(_this2)));
     _this2.handleChange = _this2.handleChange.bind(_assertThisInitialized(_assertThisInitialized(_this2)));
     _this2.handleSubmit = _this2.handleSubmit.bind(_assertThisInitialized(_assertThisInitialized(_this2)));
     _this2.handleCancel = _this2.handleCancel.bind(_assertThisInitialized(_assertThisInitialized(_this2)));
     var todayDate = new Date().toISOString().slice(0, 10);
     _this2.state = {
-      roomName: "회의실 A",
+      rooms: [],
+      rooId: 0,
+      roomName: "",
+      userId: 0,
       userName: "",
       date: todayDate,
       repeat: 0,
       startTime: "",
       endTime: "",
       modal: false,
-      reservations: {}
+      reservations: [],
+      isLoggedIn: false
     };
+    window.Kakao.init('32bad2d07ba608132111c1fd5efb1496');
+    _this2.getRoomData = _this2.getRoomData.bind(_assertThisInitialized(_assertThisInitialized(_this2)));
     _this2.getReservationData = _this2.getReservationData.bind(_assertThisInitialized(_assertThisInitialized(_this2)));
     return _this2;
   }
 
   _createClass(App, [{
+    key: "getRoomData",
+    value: function getRoomData() {
+      var _this3 = this;
+
+      fetch('rooms', {
+        method: 'GET'
+      }).then(function (response) {
+        return response.json();
+      }).then(function (data) {
+        _this3.setState({
+          rooms: data
+        });
+
+        if (data.length > 0) {
+          _this3.setState({
+            roomName: data[0].roomName
+          });
+        }
+      });
+    }
+  }, {
     key: "getReservationData",
     value: function getReservationData(date) {
-      var _this3 = this;
+      var _this4 = this;
 
       var year = date.slice(0, 4);
       var month = date.slice(5, 7);
       var day = date.slice(8);
-      var url = 'http://localhost:8080/reservations';
+      var url = 'reservations';
       url += '?year=' + year;
       url += '&month=' + month;
       url += '&day=' + day;
       fetch(url, {
         method: 'GET',
-        mode: 'cors',
         headers: {
           'Content-Type': 'application/json'
         }
       }).then(function (response) {
         return response.json();
       }).then(function (data) {
-        _this3.setState({
+        _this4.setState({
           reservations: data
         });
       });
@@ -35134,6 +35161,7 @@ function (_React$Component2) {
   }, {
     key: "componentDidMount",
     value: function componentDidMount() {
+      this.getRoomData();
       this.getReservationData(this.state.date);
     }
   }, {
@@ -35148,20 +35176,34 @@ function (_React$Component2) {
   }, {
     key: "handleSubmit",
     value: function handleSubmit(e) {
-      var _this4 = this;
+      var _this5 = this;
 
       e.preventDefault();
+      var roomId;
+      this.state.rooms.map(function (room, index) {
+        if (room.roomName === _this5.state.roomName) {
+          roomId = room.id;
+        }
+      });
+      var room = {
+        "id": roomId,
+        "roomName": this.state.roomName
+      };
+      var user = {
+        "id": this.state.userId,
+        "userName": this.state.userName
+      };
       var req = {
-        "roomName": this.state.roomName,
-        "userName": this.state.userName,
+        "room": room,
+        "user": user,
         "date": this.state.date,
         "repeat": this.state.repeat,
         "startTime": this.state.startTime,
         "endTime": this.state.endTime
       };
-      fetch('http://localhost:8080/reservations', {
+      console.log(req);
+      fetch('reservations', {
         method: 'POST',
-        mode: 'cors',
         headers: {
           'Content-Type': 'application/json'
         },
@@ -35169,19 +35211,18 @@ function (_React$Component2) {
       }).then(function (response) {
         if (response.status === 200) alert("예약이 완료되었습니다.");else alert("예약이 실패하였습니다.");
 
-        _this4.getReservationData(_this4.state.date);
+        _this5.getReservationData(_this5.state.date);
       });
     }
   }, {
     key: "handleCancel",
     value: function handleCancel(id) {
-      var _this5 = this;
+      var _this6 = this;
 
-      fetch('http://localhost:8080/reservations/' + id, {
-        method: 'DELETE',
-        mode: 'cors'
+      fetch('reservations/' + id, {
+        method: 'DELETE'
       }).then(function () {
-        _this5.getReservationData(_this5.state.date);
+        _this6.getReservationData(_this6.state.date);
       });
     }
   }, {
@@ -35192,8 +35233,66 @@ function (_React$Component2) {
       });
     }
   }, {
+    key: "setLoginState",
+    value: function setLoginState(loggedIn) {
+      this.setState({
+        isLoggedIn: loggedIn
+      });
+      console.log(this.state.isLoggedIn);
+    }
+  }, {
+    key: "login",
+    value: function login() {
+      var that = this;
+      window.Kakao.Auth.login({
+        success: function success(authObj) {
+          window.Kakao.API.request({
+            url: '/v2/user/me',
+            success: function success(res) {
+              that.setState({
+                userId: res.id,
+                userName: res.properties.nickname
+              });
+              that.setState({
+                isLoggedIn: true
+              });
+            },
+            fail: function fail(error) {
+              alert(JSON.stringify(error));
+              that.setState({
+                isLoggedIn: true
+              });
+            }
+          });
+        },
+        fail: function fail(err) {
+          alert(JSON.stringify(error));
+          that.setState({
+            isLoggedIn: false
+          });
+        }
+      });
+    }
+  }, {
     key: "render",
     value: function render() {
+      var isLoggedIn = this.state.isLoggedIn;
+      var navButton;
+
+      if (isLoggedIn) {
+        navButton = react__WEBPACK_IMPORTED_MODULE_1___default.a.createElement(reactstrap__WEBPACK_IMPORTED_MODULE_3__["Button"], {
+          outline: true,
+          color: "warning",
+          onClick: this.toggle
+        }, "\uC608\uC57D\uD558\uAE30");
+      } else {
+        navButton = react__WEBPACK_IMPORTED_MODULE_1___default.a.createElement(reactstrap__WEBPACK_IMPORTED_MODULE_3__["Button"], {
+          outline: true,
+          color: "warning",
+          onClick: this.login
+        }, "\uB85C\uADF8\uC778");
+      }
+
       return react__WEBPACK_IMPORTED_MODULE_1___default.a.createElement("div", {
         className: "main"
       }, react__WEBPACK_IMPORTED_MODULE_1___default.a.createElement("div", {
@@ -35206,11 +35305,9 @@ function (_React$Component2) {
       }, "\uD68C\uC758\uC2E4"), react__WEBPACK_IMPORTED_MODULE_1___default.a.createElement(reactstrap__WEBPACK_IMPORTED_MODULE_3__["Nav"], {
         className: "ml-auto",
         navbar: true
-      }, react__WEBPACK_IMPORTED_MODULE_1___default.a.createElement(reactstrap__WEBPACK_IMPORTED_MODULE_3__["Button"], {
-        outline: true,
-        color: "warning",
-        onClick: this.toggle
-      }, "\uC608\uC57D\uD558\uAE30")), react__WEBPACK_IMPORTED_MODULE_1___default.a.createElement(reactstrap__WEBPACK_IMPORTED_MODULE_3__["Modal"], {
+      }, navButton), react__WEBPACK_IMPORTED_MODULE_1___default.a.createElement("a", {
+        id: "kakao-login-btn"
+      }), react__WEBPACK_IMPORTED_MODULE_1___default.a.createElement(reactstrap__WEBPACK_IMPORTED_MODULE_3__["Modal"], {
         isOpen: this.state.modal,
         toggle: this.toggle,
         className: this.props.className
@@ -35225,7 +35322,11 @@ function (_React$Component2) {
         name: "roomName",
         value: this.state.roomName,
         onChange: this.handleChange
-      }, react__WEBPACK_IMPORTED_MODULE_1___default.a.createElement("option", null, "\uD68C\uC758\uC2E4 A"), react__WEBPACK_IMPORTED_MODULE_1___default.a.createElement("option", null, "\uD68C\uC758\uC2E4 B"), react__WEBPACK_IMPORTED_MODULE_1___default.a.createElement("option", null, "\uD68C\uC758\uC2E4 C"), react__WEBPACK_IMPORTED_MODULE_1___default.a.createElement("option", null, "\uD68C\uC758\uC2E4 D"), react__WEBPACK_IMPORTED_MODULE_1___default.a.createElement("option", null, "\uD68C\uC758\uC2E4 E"), react__WEBPACK_IMPORTED_MODULE_1___default.a.createElement("option", null, "\uD68C\uC758\uC2E4 F"), react__WEBPACK_IMPORTED_MODULE_1___default.a.createElement("option", null, "\uD68C\uC758\uC2E4 G")), react__WEBPACK_IMPORTED_MODULE_1___default.a.createElement(reactstrap__WEBPACK_IMPORTED_MODULE_3__["Label"], {
+      }, this.state.rooms.map(function (room, index) {
+        return react__WEBPACK_IMPORTED_MODULE_1___default.a.createElement("option", {
+          key: index
+        }, room.roomName);
+      })), react__WEBPACK_IMPORTED_MODULE_1___default.a.createElement(reactstrap__WEBPACK_IMPORTED_MODULE_3__["Label"], {
         for: "userName"
       }, "\uC608\uC57D\uC790\uBA85"), react__WEBPACK_IMPORTED_MODULE_1___default.a.createElement(reactstrap__WEBPACK_IMPORTED_MODULE_3__["Input"], {
         name: "userName",
@@ -35268,6 +35369,7 @@ function (_React$Component2) {
         color: "secondary",
         onClick: this.toggle
       }, "\uCDE8\uC18C"))))))), react__WEBPACK_IMPORTED_MODULE_1___default.a.createElement(ReservationBoard, {
+        rooms: this.state.rooms,
         date: this.state.date,
         onChange: this.handleChange,
         onCancel: this.handleCancel,

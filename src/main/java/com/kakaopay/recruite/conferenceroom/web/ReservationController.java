@@ -1,13 +1,12 @@
 package com.kakaopay.recruite.conferenceroom.web;
 
+import com.kakaopay.recruite.conferenceroom.domain.Room;
 import com.kakaopay.recruite.conferenceroom.dto.ReservationDto;
-import com.kakaopay.recruite.conferenceroom.dao.RoomDao;
-import com.kakaopay.recruite.conferenceroom.dao.UserDao;
+import com.kakaopay.recruite.conferenceroom.domain.User;
 import com.kakaopay.recruite.conferenceroom.service.ReservationService;
 import com.kakaopay.recruite.conferenceroom.service.RoomService;
 import com.kakaopay.recruite.conferenceroom.service.UserService;
 import lombok.extern.slf4j.Slf4j;
-import org.h2.engine.User;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -32,16 +31,18 @@ public class ReservationController {
 
     @PostMapping(value = "/reservations", consumes = "application/json")
     public ResponseEntity<Void> create(@Valid @RequestBody ReservationDto req) {
-        UserDao userDao = userService.findUser(req.getUser().getId()).orElse(null);
-        if (userDao == null)
-            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
-
-        RoomDao roomDao = roomService.findRoom(req.getRoom().getId()).orElse(null);
-        if (roomDao == null)
+        Room room = roomService.findRoom(req.getRoom().getId()).orElse(null);
+        if (room == null)
             return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
 
+        User user = userService.findUser(req.getUser().getId()).orElse(null);
+        if (user == null) {
+            user = userService.createUser(req.getUser());
+            log.info(user.toString());
+        }
+
         try {
-            reservationService.createReservation(userDao, roomDao, req);
+            reservationService.createReservation(user, room, req);
         } catch (Exception e) {
             return ResponseEntity.status(HttpStatus.CONFLICT).build();
         }

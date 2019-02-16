@@ -1,6 +1,6 @@
 package com.kakaopay.recruite.conferenceroom.service;
 
-import com.kakaopay.recruite.conferenceroom.dao.*;
+import com.kakaopay.recruite.conferenceroom.domain.*;
 import com.kakaopay.recruite.conferenceroom.dto.ReservationDto;
 import com.kakaopay.recruite.conferenceroom.repository.ReservationRepository;
 import com.kakaopay.recruite.conferenceroom.repository.ReservationStatusRepository;
@@ -15,7 +15,6 @@ import java.time.LocalDate;
 import java.time.LocalTime;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Optional;
 
 @Service
 @Slf4j
@@ -34,7 +33,7 @@ public class ReservationService {
      * @param reservationDTO 생성할 예약 정보
      */
     @Transactional
-    public synchronized void createReservation(UserDao userDao, RoomDao roomDao, ReservationDto reservationDTO) {
+    public void createReservation(User user, Room room, ReservationDto reservationDTO) {
         LocalDate date = LocalDate.of(
                 Integer.valueOf(reservationDTO.getDate().split("-")[0]),
                 Integer.valueOf(reservationDTO.getDate().split("-")[1]),
@@ -49,9 +48,9 @@ public class ReservationService {
                 Integer.valueOf(reservationDTO.getEndTime().split(":")[1])
         );
 
-        ReservationDao reservationDao = ReservationDao.builder()
-                .room(roomDao)
-                .user(userDao)
+        Reservation reservation = Reservation.builder()
+                .room(room)
+                .user(user)
                 .repeat(reservationDTO.getRepeat())
                 .dayOfWeek(date.getDayOfWeek())
                 .startDate(date)
@@ -60,12 +59,12 @@ public class ReservationService {
                 .endTime(endTime)
                 .build();
 
-        reservationDao = reservationRepository.save(reservationDao);
+        reservation = reservationRepository.save(reservation);
 
         for(int i=0; i<=reservationDTO.getRepeat(); ++i) {
             for (LocalTime time = startTime; time.isBefore(endTime); time = time.plusMinutes(30)) {
-                ReservationStatusDao reservationStatusDao = ReservationStatusDao.builder().date(date.plusWeeks(i)).room(roomDao).time(time).reservation(reservationDao).build();
-                reservationStatusRepository.save(reservationStatusDao);
+                ReservationStatus reservationStatus = ReservationStatus.builder().date(date.plusWeeks(i)).room(room).time(time).reservation(reservation).build();
+                reservationStatusRepository.save(reservationStatus);
             }
         }
     }
@@ -77,7 +76,11 @@ public class ReservationService {
      */
     public List<ReservationDto> findReservation(LocalDate date) {
         List<ReservationDto> reservationDtoList = new ArrayList<>();
-        reservationRepository.findAllByDateAndDayOfWeek(date, date.getDayOfWeek()).forEach(reservation -> reservationDtoList.add(new ReservationDto(reservation)));
+        reservationRepository.findAllByDateAndDayOfWeek(date, date.getDayOfWeek()).forEach( reservation -> {
+                ReservationDto reservationDto = new ReservationDto(reservation);
+                reservationDtoList.add(reservationDto);
+            }
+        );
         return reservationDtoList;
     }
 

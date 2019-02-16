@@ -1,16 +1,15 @@
 package com.kakaopay.recruite.conferenceroom;
 
-import com.kakaopay.recruite.conferenceroom.dao.ReservationDao;
-import com.kakaopay.recruite.conferenceroom.dao.ReservationStatusDao;
-import com.kakaopay.recruite.conferenceroom.dao.RoomDao;
-import com.kakaopay.recruite.conferenceroom.dao.UserDao;
+import com.kakaopay.recruite.conferenceroom.domain.Reservation;
+import com.kakaopay.recruite.conferenceroom.domain.ReservationStatus;
+import com.kakaopay.recruite.conferenceroom.domain.Room;
+import com.kakaopay.recruite.conferenceroom.domain.User;
 import com.kakaopay.recruite.conferenceroom.repository.ReservationRepository;
 import com.kakaopay.recruite.conferenceroom.repository.ReservationStatusRepository;
 import com.kakaopay.recruite.conferenceroom.repository.RoomRepository;
 import com.kakaopay.recruite.conferenceroom.repository.UserRepository;
 import lombok.extern.slf4j.Slf4j;
 import org.junit.Before;
-import org.junit.BeforeClass;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -50,14 +49,14 @@ public class ReservationRepositoryTests {
      */
     @Test
     public void test_create_onetime_reservation() {
-        RoomDao roomDao = roomRepository.findById(roomId).orElse(null);
-        UserDao userDao = userRepository.findById(userId).orElse(null);
+        Room room = roomRepository.findById(roomId).orElse(null);
+        User user = userRepository.findById(userId).orElse(null);
 
         // 예약 등록
         LocalDate date = LocalDate.of(2019, 1, 1);
-        ReservationDao reservationDao = ReservationDao.builder()
-                .room(roomDao)
-                .user(userDao)
+        Reservation reservation = Reservation.builder()
+                .room(room)
+                .user(user)
                 .repeat(0)
                 .dayOfWeek(date.getDayOfWeek())
                 .startDate(date)
@@ -65,15 +64,15 @@ public class ReservationRepositoryTests {
                 .startTime(LocalTime.of(13, 30))
                 .endTime(LocalTime.of(14, 30))
                 .build();
-        reservationRepository.save(reservationDao);
+        reservationRepository.save(reservation);
 
         // 예약 조회
-        ReservationDao findReservationDao = reservationRepository.findById(reservationDao.getId()).orElse(null);
+        Reservation findReservation = reservationRepository.findById(reservation.getId()).orElse(null);
 
         // 비교
-        assertEquals(roomDao, findReservationDao.getRoom());
-        assertEquals(userDao, findReservationDao.getUser());
-        assertEquals(reservationDao, findReservationDao);
+        assertEquals(room, findReservation.getRoom());
+        assertEquals(user, findReservation.getUser());
+        assertEquals(reservation, findReservation);
     }
 
     /**
@@ -87,7 +86,7 @@ public class ReservationRepositoryTests {
         LocalDate endDate = startDate.plusWeeks(3);
         LocalTime startTime = LocalTime.of(10, 30);
         LocalTime endTime = LocalTime.of(11, 30);
-        ReservationDao reservationDao = ReservationDao.builder()
+        Reservation reservation = Reservation.builder()
                 .repeat(repeat)
                 .dayOfWeek(startDate.getDayOfWeek())
                 .startDate(startDate)
@@ -95,13 +94,13 @@ public class ReservationRepositoryTests {
                 .startTime(startTime)
                 .endTime(endTime)
                 .build();
-        reservationRepository.save(reservationDao);
+        reservationRepository.save(reservation);
 
         // 예약 조회
-        ReservationDao data = reservationRepository.findById(reservationDao.getId()).orElse(null);
+        Reservation data = reservationRepository.findById(reservation.getId()).orElse(null);
 
         // 비교
-        assertEquals(reservationDao, data);
+        assertEquals(reservation, data);
     }
 
     /**
@@ -109,14 +108,14 @@ public class ReservationRepositoryTests {
      */
     @Test
     public void test_reservation_status() {
-        RoomDao roomDao = roomRepository.findById(roomId).orElse(null);
+        Room room = roomRepository.findById(roomId).orElse(null);
 
         int repeat = 3;
         LocalDate startDate = LocalDate.of(2019, 1, 1);
         LocalDate endDate = startDate.plusWeeks(3);
         LocalTime startTime = LocalTime.of(10, 30);
         LocalTime endTime = LocalTime.of(11, 30);
-        ReservationDao reservationDao = ReservationDao.builder()
+        Reservation reservation = Reservation.builder()
                 .repeat(repeat)
                 .dayOfWeek(startDate.getDayOfWeek())
                 .startDate(startDate)
@@ -124,18 +123,18 @@ public class ReservationRepositoryTests {
                 .startTime(startTime)
                 .endTime(endTime)
                 .build();
-        reservationRepository.save(reservationDao);
+        reservationRepository.save(reservation);
 
         for(int i=0; i<=repeat; ++i) {
             for (LocalTime time = startTime; time.isBefore(endTime); time = time.plusMinutes(30)) {
-                ReservationStatusDao reservationStatusDao = ReservationStatusDao.builder().date(startDate.plusWeeks(i)).room(roomDao).time(time).reservation(reservationDao).build();
-                reservationStatusRepository.save(reservationStatusDao);
+                ReservationStatus reservationStatus = ReservationStatus.builder().date(startDate.plusWeeks(i)).room(room).time(time).reservation(reservation).build();
+                reservationStatusRepository.save(reservationStatus);
             }
         }
 
         for(int i=0; i<=repeat; ++i) {
             for (LocalTime time = startTime; time.isBefore(endTime); time = time.plusMinutes(30)) {
-                assertTrue(reservationStatusRepository.existsByRoom_IdAndDateAndTime(roomDao.getId(), startDate.plusWeeks(i), time));
+                assertTrue(reservationStatusRepository.existsByRoom_IdAndDateAndTime(room.getId(), startDate.plusWeeks(i), time));
             }
         }
     }

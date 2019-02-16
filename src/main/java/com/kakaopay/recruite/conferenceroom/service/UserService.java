@@ -1,8 +1,6 @@
 package com.kakaopay.recruite.conferenceroom.service;
 
-import com.kakaopay.recruite.conferenceroom.dao.RoomDao;
-import com.kakaopay.recruite.conferenceroom.dao.UserDao;
-import com.kakaopay.recruite.conferenceroom.dto.RoomDto;
+import com.kakaopay.recruite.conferenceroom.domain.User;
 import com.kakaopay.recruite.conferenceroom.dto.UserDto;
 import com.kakaopay.recruite.conferenceroom.repository.UserRepository;
 import lombok.extern.slf4j.Slf4j;
@@ -17,18 +15,19 @@ public class UserService {
     @Autowired
     UserRepository userRepository;
 
-    public void createUser(UserDto userDto) {
-        UserDao userDao = UserDao.builder().userName(userDto.getUserName()).build();
-        userRepository.save(userDao);
-        userDto.setId(userDao.getId());
+    public User createUser(UserDto userDto) {
+        User user = User.builder().id(userDto.getId()).userName(userDto.getUserName()).build();
+        userRepository.save(user);
+        userDto.setId(user.getId());
+        return user;
     }
 
-    public Optional<UserDao> findUser(Long id) {
+    public Optional<User> findUser(Long id) {
         return userRepository.findById(id);
     }
 
     public UserDto findUserByUserName(String userName) {
-        UserDao userDao = userRepository.findByUserName(userName);
-        return UserDto.builder().id(userDao.getId()).userName(userDao.getUserName()).build();
+        User user = userRepository.findByUserName(userName);
+        return UserDto.builder().id(user.getId()).userName(user.getUserName()).build();
     }
 }

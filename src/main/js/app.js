@@ -52,6 +52,7 @@ var datePickerStyle = {
   verticalAlign: 'bottom',
   textAlign: 'center',
   borderBottom: '1px solid #dee2e6',
+  backgroundColor: 'white',
 }
 
 var roomListStyle = {
@@ -76,10 +77,9 @@ var timeLineStyle = {
 
 class ReservationBoard extends React.Component {
   render() {
-    const roomNames = ["회의실 A", "회의실 B", "회의실 C", "회의실 D", "회의실 E", "회의실 F", "회의실 G"];
-    const listRooms = roomNames.map((roomName, index) =>
+    const listRooms = this.props.rooms.map((room, index) =>
         <Col className={'font-weight-bold'} style={roomListStyle} key={index}>
-          {roomName}
+          {room.roomName}
         </Col>
     );
 
@@ -100,12 +100,12 @@ class ReservationBoard extends React.Component {
     const TableBody = timeRanges.map((timeRange, index) =>
       <Row key={index}>
         <Col key={timeRange.toString} className={'font-weight-bold'} style={timeRangeStyle}>{timeRange}</Col>
-        {roomNames.map((roomName) => {
+        {this.props.rooms.map((room) => {
           var ret = (<Col style={timeLineStyle}/>);
           Array.prototype.forEach.call(this.props.reservations, reservation => {
             let startTime = (parseInt(index/2)<10?"0":"") + parseInt(index/2) + ":" + ((index%2)?"30":"00");
             let endTime = (parseInt((index+1)/2)<10?"0":"") + parseInt((index+1)/2) + ":" + ((index%2)?"00":"30");
-            if(reservation.roomName === roomName &&
+            if(reservation.room.id === room.id &&
                reservation.startTime <= startTime &&
                reservation.endTime >= endTime) {
               if(reservation.startTime === startTime) {
@@ -140,6 +140,7 @@ class App extends React.Component {
   constructor() {
     super();
 
+    this.login = this.login.bind(this);
     this.toggle = this.toggle.bind(this);
     this.handleChange = this.handleChange.bind(this);
     this.handleSubmit = this.handleSubmit.bind(this);
@@ -147,30 +148,51 @@ class App extends React.Component {
 
     var todayDate = new Date().toISOString().slice(0,10);
     this.state = {
-      roomName: "회의실 A",
+      rooms: [],
+      rooId: 0,
+      roomName: "",
+      userId: 0,
       userName: "",
       date: todayDate,
       repeat: 0,
       startTime: "",
       endTime: "",
       modal: false,
-      reservations: {}
+      reservations: [],
+      isLoggedIn: false,
     };
 
+    window.Kakao.init('32bad2d07ba608132111c1fd5efb1496');
+    this.getRoomData = this.getRoomData.bind(this);
     this.getReservationData = this.getReservationData.bind(this);
+  }
+
+  getRoomData() {
+    fetch('rooms', {
+        method: 'GET',
+    }).then(response => response.json())
+    .then(data => {
+      this.setState({
+        rooms: data
+      });
+      if(data.length > 0) {
+          this.setState({
+            roomName: data[0].roomName
+          });
+      }
+    })
   }
 
   getReservationData(date) {
     var year = date.slice(0, 4);
     var month = date.slice(5, 7);
     var day = date.slice(8);
-    var url = 'http://localhost:8080/reservations'
+    var url = 'reservations';
     url += '?year=' + year;
     url += '&month=' + month;
     url += '&day=' + day;
     fetch(url, {
       method: 'GET',
-      mode: 'cors',
       headers: {'Content-Type':'application/json'},
     }).then(response => response.json())
     .then(data => {
@@ -181,6 +203,7 @@ class App extends React.Component {
   }
 
   componentDidMount() {
+    this.getRoomData();
     this.getReservationData(this.state.date);
   }
 
@@ -197,18 +220,33 @@ class App extends React.Component {
 
   handleSubmit(e) {
     e.preventDefault();
-    var req = {
-      "roomName" : this.state.roomName,
-      "userName" : this.state.userName,
+
+    let roomId;
+    this.state.rooms.map((room, index) => {
+        if(room.roomName === this.state.roomName) {
+            roomId = room.id;
+        }
+    })
+
+    const room = {
+      "id" : roomId,
+      "roomName" : this.state.roomName
+    }
+    const user = {
+      "id" : this.state.userId,
+      "userName" : this.state.userName
+    }
+    const req = {
+      "room" : room,
+      "user" : user,
       "date" : this.state.date,
       "repeat" : this.state.repeat,
       "startTime" : this.state.startTime,
-      "endTime" : this.state.endTime,
+      "endTime" : this.state.endTime
     }
 
-    fetch('http://localhost:8080/reservations', {
+    fetch('reservations', {
       method: 'POST',
-      mode: 'cors',
       headers: {'Content-Type':'application/json'},
       body: JSON.stringify(req),
     }).then(response => {
@@ -221,9 +259,8 @@ class App extends React.Component {
   }
 
   handleCancel(id) {
-    fetch('http://localhost:8080/reservations/'+id, {
+    fetch('reservations/'+id, {
       method: 'DELETE',
-      mode: 'cors',
     }).then(() => {
       this.getReservationData(this.state.date);
     })
@@ -235,14 +272,55 @@ class App extends React.Component {
     });
   }
 
+  setLoginState(loggedIn) {
+     this.setState({isLoggedIn: loggedIn});
+     console.log(this.state.isLoggedIn);
+  }
+
+  login() {
+    var that = this;
+    window.Kakao.Auth.login({
+        success: function(authObj) {
+            window.Kakao.API.request({
+                url: '/v2/user/me',
+                success: function(res) {
+                    that.setState({
+                        userId: res.id,
+                        userName: res.properties.nickname,
+                    })
+                    that.setState({isLoggedIn: true});
+                },
+                fail: function(error) {
+                    alert(JSON.stringify(error));
+                    that.setState({isLoggedIn: true});
+                }
+            });
+        },
+        fail: function(err) {
+            alert(JSON.stringify(error));
+            that.setState({isLoggedIn: false});
+        }
+    });
+  }
+
   render() {
+    const isLoggedIn = this.state.isLoggedIn;
+    let navButton;
+
+    if (isLoggedIn) {
+      navButton = <Button outline color="warning" onClick={this.toggle}>예약하기</Button>;
+    } else {
+      navButton = <Button outline color="warning" onClick={this.login}>로그인</Button>;
+    }
+
     return <div className="main">
       <div style={navStyle}>
       <Navbar dark expand="md">
         <NavbarBrand href="/">회의실</NavbarBrand>
         <Nav className="ml-auto" navbar>
-          <Button outline color="warning" onClick={this.toggle}>예약하기</Button>
+          {navButton}
         </Nav>
+        <a id="kakao-login-btn"></a>
         <Modal isOpen={this.state.modal} toggle={this.toggle} className={this.props.className}>
           <Form onSubmit={this.handleSubmit}>
             <FormGroup>
@@ -250,13 +328,9 @@ class App extends React.Component {
               <ModalBody>
                 <Label for="roomName">회의실</Label>
                 <Input type="select" name="roomName" value={this.state.roomName} onChange={this.handleChange}>
-                  <option>회의실 A</option>
-                  <option>회의실 B</option>
-                  <option>회의실 C</option>
-                  <option>회의실 D</option>
-                  <option>회의실 E</option>
-                  <option>회의실 F</option>
-                  <option>회의실 G</option>
+                  { this.state.rooms.map((room, index) => {
+                    return <option key={index}>{room.roomName}</option>;
+                  })}
                 </Input>
                 <Label for="userName">예약자명</Label>
                 <Input name="userName" value={this.state.userName} onChange={this.handleChange} placeholder="예약자명" />
@@ -278,7 +352,7 @@ class App extends React.Component {
         </Modal>
       </Navbar>
       </div>
-      <ReservationBoard date={this.state.date} onChange={this.handleChange} onCancel={this.handleCancel} reservations={this.state.reservations}/>
+      <ReservationBoard rooms={this.state.rooms} date={this.state.date} onChange={this.handleChange} onCancel={this.handleCancel} reservations={this.state.reservations}/>
     </div>;
   }
 }

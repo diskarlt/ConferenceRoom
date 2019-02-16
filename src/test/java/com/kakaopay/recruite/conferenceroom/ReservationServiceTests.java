@@ -1,6 +1,6 @@
 package com.kakaopay.recruite.conferenceroom;
 
-import com.kakaopay.recruite.conferenceroom.dao.*;
+import com.kakaopay.recruite.conferenceroom.domain.*;
 import com.kakaopay.recruite.conferenceroom.dto.ReservationDto;
 import com.kakaopay.recruite.conferenceroom.repository.ReservationRepository;
 import com.kakaopay.recruite.conferenceroom.repository.ReservationStatusRepository;
@@ -44,17 +44,17 @@ public class ReservationServiceTests {
     public void test_create_onetime_reservation() {
         String roomName = "회의실 A";
         String userName = "사용자 A";
-        RoomDao roomDao = RoomDao.builder().id(1L).roomName(roomName).build();
-        UserDao userDao = UserDao.builder().id(1L).userName(userName).build();
+        Room room = Room.builder().id(1L).roomName(roomName).build();
+        User user = User.builder().id(1L).userName(userName).build();
         int repeat = 0;
         LocalDate date = LocalDate.of(2019, 1, 1);
         LocalTime startTime = LocalTime.of(10, 0);
         LocalTime endTime = LocalTime.of(11, 30);
 
-        ReservationDao reservationDao = ReservationDao.builder()
+        Reservation reservation = Reservation.builder()
                 .id(1L)
-                .user(userDao)
-                .room(roomDao)
+                .user(user)
+                .room(room)
                 .repeat(repeat)
                 .dayOfWeek(date.getDayOfWeek())
                 .startDate(date)
@@ -62,18 +62,18 @@ public class ReservationServiceTests {
                 .startTime(startTime)
                 .endTime(endTime)
                 .build();
-        when(reservationRepository.save(any(ReservationDao.class))).thenReturn(reservationDao);
-        when(reservationStatusRepository.save(any(ReservationStatusDao.class)))
-                .thenReturn(ReservationStatusDao.builder().id(1L).date(date).room(roomDao).time(startTime).reservation(reservationDao).build())
-                .thenReturn(ReservationStatusDao.builder().id(2L).date(date).room(roomDao).time(startTime.plusMinutes(30)).reservation(reservationDao).build())
-                .thenReturn(ReservationStatusDao.builder().id(3L).date(date).room(roomDao).time(startTime.plusMinutes(60)).reservation(reservationDao).build());
+        when(reservationRepository.save(any(Reservation.class))).thenReturn(reservation);
+        when(reservationStatusRepository.save(any(ReservationStatus.class)))
+                .thenReturn(ReservationStatus.builder().id(1L).date(date).room(room).time(startTime).reservation(reservation).build())
+                .thenReturn(ReservationStatus.builder().id(2L).date(date).room(room).time(startTime.plusMinutes(30)).reservation(reservation).build())
+                .thenReturn(ReservationStatus.builder().id(3L).date(date).room(room).time(startTime.plusMinutes(60)).reservation(reservation).build());
 
-        ReservationDto reservationDto = new ReservationDto(reservationDao);
-        reservationService.createReservation(userDao, roomDao, reservationDto);
+        ReservationDto reservationDto = new ReservationDto(reservation);
+        reservationService.createReservation(user, room, reservationDto);
 
-        verify(reservationRepository).save(any(ReservationDao.class));
+        verify(reservationRepository).save(any(Reservation.class));
         // 9:00 ~ 10:30 의 경우 30분 단위 구간으로 9:00~9:30, 9:30~10:00, 10:00~10:30을 예약 상태로 저장한다.
-        verify(reservationStatusRepository, times(3)).save(any(ReservationStatusDao.class));
+        verify(reservationStatusRepository, times(3)).save(any(ReservationStatus.class));
     }
 
     /**
@@ -83,17 +83,17 @@ public class ReservationServiceTests {
     public void test_create_repeat_reservation() {
         String roomName = "회의실 A";
         String userName = "사용자 A";
-        RoomDao roomDao = RoomDao.builder().id(1L).roomName(roomName).build();
-        UserDao userDao = UserDao.builder().id(1L).userName(userName).build();
+        Room room = Room.builder().id(1L).roomName(roomName).build();
+        User user = User.builder().id(1L).userName(userName).build();
         int repeat = 2;
         LocalDate date = LocalDate.of(2019, 1, 1);
         LocalTime startTime = LocalTime.of(10, 0);
         LocalTime endTime = LocalTime.of(11, 30);
 
-        ReservationDao reservationDao = ReservationDao.builder()
+        Reservation reservation = Reservation.builder()
                 .id(1L)
-                .user(userDao)
-                .room(roomDao)
+                .user(user)
+                .room(room)
                 .repeat(repeat)
                 .dayOfWeek(date.getDayOfWeek())
                 .startDate(date)
@@ -101,24 +101,24 @@ public class ReservationServiceTests {
                 .startTime(startTime)
                 .endTime(endTime)
                 .build();
-        when(reservationRepository.save(any(ReservationDao.class))).thenReturn(reservationDao);
-        when(reservationStatusRepository.save(any(ReservationStatusDao.class)))
-                .thenReturn(ReservationStatusDao.builder().id(1L).date(date).room(roomDao).time(startTime).reservation(reservationDao).build())
-                .thenReturn(ReservationStatusDao.builder().id(2L).date(date).room(roomDao).time(startTime.plusMinutes(30)).reservation(reservationDao).build())
-                .thenReturn(ReservationStatusDao.builder().id(3L).date(date).room(roomDao).time(startTime.plusMinutes(60)).reservation(reservationDao).build())
-                .thenReturn(ReservationStatusDao.builder().id(4L).date(date.plusWeeks(1)).room(roomDao).time(startTime).reservation(reservationDao).build())
-                .thenReturn(ReservationStatusDao.builder().id(5L).date(date.plusWeeks(1)).room(roomDao).time(startTime.plusMinutes(30)).reservation(reservationDao).build())
-                .thenReturn(ReservationStatusDao.builder().id(6L).date(date.plusWeeks(1)).room(roomDao).time(startTime.plusMinutes(60)).reservation(reservationDao).build())
-                .thenReturn(ReservationStatusDao.builder().id(7L).date(date.plusWeeks(2)).room(roomDao).time(startTime).reservation(reservationDao).build())
-                .thenReturn(ReservationStatusDao.builder().id(8L).date(date.plusWeeks(2)).room(roomDao).time(startTime.plusMinutes(30)).reservation(reservationDao).build())
-                .thenReturn(ReservationStatusDao.builder().id(9L).date(date.plusWeeks(2)).room(roomDao).time(startTime.plusMinutes(60)).reservation(reservationDao).build());
+        when(reservationRepository.save(any(Reservation.class))).thenReturn(reservation);
+        when(reservationStatusRepository.save(any(ReservationStatus.class)))
+                .thenReturn(ReservationStatus.builder().id(1L).date(date).room(room).time(startTime).reservation(reservation).build())
+                .thenReturn(ReservationStatus.builder().id(2L).date(date).room(room).time(startTime.plusMinutes(30)).reservation(reservation).build())
+                .thenReturn(ReservationStatus.builder().id(3L).date(date).room(room).time(startTime.plusMinutes(60)).reservation(reservation).build())
+                .thenReturn(ReservationStatus.builder().id(4L).date(date.plusWeeks(1)).room(room).time(startTime).reservation(reservation).build())
+                .thenReturn(ReservationStatus.builder().id(5L).date(date.plusWeeks(1)).room(room).time(startTime.plusMinutes(30)).reservation(reservation).build())
+                .thenReturn(ReservationStatus.builder().id(6L).date(date.plusWeeks(1)).room(room).time(startTime.plusMinutes(60)).reservation(reservation).build())
+                .thenReturn(ReservationStatus.builder().id(7L).date(date.plusWeeks(2)).room(room).time(startTime).reservation(reservation).build())
+                .thenReturn(ReservationStatus.builder().id(8L).date(date.plusWeeks(2)).room(room).time(startTime.plusMinutes(30)).reservation(reservation).build())
+                .thenReturn(ReservationStatus.builder().id(9L).date(date.plusWeeks(2)).room(room).time(startTime.plusMinutes(60)).reservation(reservation).build());
 
-        ReservationDto reservationDto = new ReservationDto(reservationDao);
-        reservationService.createReservation(userDao, roomDao, reservationDto);
+        ReservationDto reservationDto = new ReservationDto(reservation);
+        reservationService.createReservation(user, room, reservationDto);
 
-        verify(reservationRepository).save(any(ReservationDao.class));
+        verify(reservationRepository).save(any(Reservation.class));
         // 9:00 ~ 10:30 의 경우 30분 단위 구간으로 9:00~9:30, 9:30~10:00, 10:00~10:30을 예약 상태로 저장한다.
-        verify(reservationStatusRepository, times(3*3)).save(any(ReservationStatusDao.class));
+        verify(reservationStatusRepository, times(3*3)).save(any(ReservationStatus.class));
     }
 
     /**
@@ -127,13 +127,13 @@ public class ReservationServiceTests {
     @Test
     public void test_find_reservation() {
         LocalDate date = LocalDate.of(2019, 1, 1);
-        UserDao userDao = UserDao.builder().id(1L).userName("사용자 A").build();
-        RoomDao roomDao = RoomDao.builder().id(1L).roomName("회의실 A").build();
+        User user = User.builder().id(1L).userName("사용자 A").build();
+        Room room = Room.builder().id(1L).roomName("회의실 A").build();
 
-        ReservationDao reservationDao1 = ReservationDao.builder()
+        Reservation reservation1 = Reservation.builder()
                 .id(1L)
-                .user(userDao)
-                .room(roomDao)
+                .user(user)
+                .room(room)
                 .repeat(0)
                 .dayOfWeek(date.getDayOfWeek())
                 .startDate(date)
@@ -141,10 +141,10 @@ public class ReservationServiceTests {
                 .startTime(LocalTime.of(10,0))
                 .endTime(LocalTime.of(11,30))
                 .build();
-        ReservationDao reservationDao2 = ReservationDao.builder()
+        Reservation reservation2 = Reservation.builder()
                 .id(2L)
-                .user(userDao)
-                .room(roomDao)
+                .user(user)
+                .room(room)
                 .repeat(2)
                 .dayOfWeek(date.getDayOfWeek())
                 .startDate(date)
@@ -152,28 +152,28 @@ public class ReservationServiceTests {
                 .startTime(LocalTime.of(11,30))
                 .endTime(LocalTime.of(12,0))
                 .build();
-        List<ReservationDao> reservationDaoList = new ArrayList<>();
-        reservationDaoList.add(reservationDao1);
-        reservationDaoList.add(reservationDao2);
-        when(reservationRepository.findAllByDateAndDayOfWeek(date, date.getDayOfWeek())).thenReturn(reservationDaoList);
+        List<Reservation> reservationList = new ArrayList<>();
+        reservationList.add(reservation1);
+        reservationList.add(reservation2);
+        when(reservationRepository.findAllByDateAndDayOfWeek(date, date.getDayOfWeek())).thenReturn(reservationList);
 
         List<ReservationDto> list = reservationService.findReservation(date);
         assertEquals(2, list.size());
-        assertEquals(reservationDao1.getId(), list.get(0).getId());
-        assertEquals(reservationDao1.getUser().getId(), list.get(0).getUser().getId());
-        assertEquals(reservationDao1.getUser().getUserName(), list.get(0).getUser().getUserName());
-        assertEquals(reservationDao1.getRoom().getId(), list.get(0).getRoom().getId());
-        assertEquals(reservationDao1.getRoom().getRoomName(), list.get(0).getRoom().getRoomName());
-        assertEquals(reservationDao1.getRepeat(), list.get(0).getRepeat());
+        assertEquals(reservation1.getId(), list.get(0).getId());
+        assertEquals(reservation1.getUser().getId(), list.get(0).getUser().getId());
+        assertEquals(reservation1.getUser().getUserName(), list.get(0).getUser().getUserName());
+        assertEquals(reservation1.getRoom().getId(), list.get(0).getRoom().getId());
+        assertEquals(reservation1.getRoom().getRoomName(), list.get(0).getRoom().getRoomName());
+        assertEquals(reservation1.getRepeat(), list.get(0).getRepeat());
         assertEquals("2019-01-01", list.get(0).getDate());
         assertEquals("10:00", list.get(0).getStartTime());
         assertEquals("11:30", list.get(0).getEndTime());
-        assertEquals(reservationDao2.getId(), list.get(1).getId());
-        assertEquals(reservationDao2.getUser().getId(), list.get(1).getUser().getId());
-        assertEquals(reservationDao2.getUser().getUserName(), list.get(1).getUser().getUserName());
-        assertEquals(reservationDao2.getRoom().getId(), list.get(1).getRoom().getId());
-        assertEquals(reservationDao2.getRoom().getRoomName(), list.get(1).getRoom().getRoomName());
-        assertEquals(reservationDao2.getRepeat(), list.get(1).getRepeat());
+        assertEquals(reservation2.getId(), list.get(1).getId());
+        assertEquals(reservation2.getUser().getId(), list.get(1).getUser().getId());
+        assertEquals(reservation2.getUser().getUserName(), list.get(1).getUser().getUserName());
+        assertEquals(reservation2.getRoom().getId(), list.get(1).getRoom().getId());
+        assertEquals(reservation2.getRoom().getRoomName(), list.get(1).getRoom().getRoomName());
+        assertEquals(reservation2.getRepeat(), list.get(1).getRepeat());
         assertEquals("2019-01-01", list.get(1).getDate());
         assertEquals("11:30", list.get(1).getStartTime());
         assertEquals("12:00", list.get(1).getEndTime());
@@ -188,7 +188,7 @@ public class ReservationServiceTests {
     public void test_not_found_reservation() {
         LocalDate date = LocalDate.of(2019, 1, 1);
 
-        List<ReservationDao> list = new ArrayList<>();
+        List<Reservation> list = new ArrayList<>();
         list.clear();
         when(reservationRepository.findAllByDateAndDayOfWeek(any(LocalDate.class), any(DayOfWeek.class))).thenReturn(list);
 

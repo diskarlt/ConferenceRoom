@@ -1,4 +1,4 @@
-package com.kakaopay.recruite.conferenceroom.dao;
+package com.kakaopay.recruite.conferenceroom.domain;
 
 import lombok.Builder;
 import lombok.Data;
@@ -11,17 +11,17 @@ import java.time.LocalTime;
 @Builder
 @Entity
 @Data
-public class ReservationDao {
+public class Reservation {
     @Id @GeneratedValue
     @Column(name = "RESERVATION_ID")
     private Long id;
 
     @ManyToOne
     @JoinColumn(name = "USER_ID")
-    private final UserDao user;
+    private final User user;
     @ManyToOne
     @JoinColumn(name = "ROOM_ID")
-    private final RoomDao room;
+    private final Room room;
 
     private final int repeat;
     private final DayOfWeek dayOfWeek;
