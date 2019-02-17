@@ -35201,7 +35201,6 @@ function (_React$Component2) {
         "startTime": this.state.startTime,
         "endTime": this.state.endTime
       };
-      console.log(req);
       fetch('reservations', {
         method: 'POST',
         headers: {
