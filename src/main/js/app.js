@@ -100,8 +100,8 @@ class ReservationBoard extends React.Component {
     const TableBody = timeRanges.map((timeRange, index) =>
       <Row key={index}>
         <Col key={timeRange.toString} className={'font-weight-bold'} style={timeRangeStyle}>{timeRange}</Col>
-        {this.props.rooms.map((room) => {
-          var ret = (<Col style={timeLineStyle}/>);
+        {this.props.rooms.map((room, roomIdx) => {
+          var ret = (<Col key={roomIdx} style={timeLineStyle}/>);
           Array.prototype.forEach.call(this.props.reservations, reservation => {
             let startTime = (parseInt(index/2)<10?"0":"") + parseInt(index/2) + ":" + ((index%2)?"30":"00");
             let endTime = (parseInt((index+1)/2)<10?"0":"") + parseInt((index+1)/2) + ":" + ((index%2)?"00":"30");
@@ -109,14 +109,14 @@ class ReservationBoard extends React.Component {
                reservation.startTime <= startTime &&
                reservation.endTime >= endTime) {
               if(reservation.startTime === startTime) {
-                ret = (<Col className='font-weight-bold' style={reservationStyle}>
+                ret = (<Col key={roomIdx} className='font-weight-bold' style={reservationStyle}>
                           <Button id={reservation.id} onClick={()=>this.props.onCancel(reservation.id)} close />
                           { reservation.repeat?<div>(반복 {reservation.repeat}회)</div>: null }
-                          <div>{reservation.userName}</div>
+                          <div>{reservation.user.userName}</div>
                           <div>{reservation.startTime} ~ {reservation.endTime}</div>
                        </Col>);
               } else {
-                ret = (<Col className='font-weight-bold' style={{...reservationStyle, borderTop: '0'}} />)
+                ret = (<Col key={roomIdx} className='font-weight-bold' style={{...reservationStyle, borderTop: '0'}} />)
               }
             }
           })
