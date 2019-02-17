@@ -2,7 +2,6 @@
 /logs/
 !.mvn/wrapper/maven-wrapper.jar
 node_modules
-.mvn
 
 ### STS ###
 .apt_generated
