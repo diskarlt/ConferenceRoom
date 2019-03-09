@@ -27,9 +27,6 @@ public class RoomController {
 
     @GetMapping(value = "/rooms")
     public List<RoomDto> findAll() {
-        List<RoomDto> roomDtoList = new ArrayList<>();
-
-        roomService.findAllRoom().forEach(roomData -> roomDtoList.add(roomData));
-        return roomDtoList;
+        return roomService.findAllRoom();
     }
 }

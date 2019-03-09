@@ -1,13 +1,17 @@
 package com.kakaopay.recruite.conferenceroom.domain;
 
-import lombok.Builder;
-import lombok.Data;
+import lombok.*;
 
 import javax.persistence.*;
 
-@Builder
 @Entity
-@Data
+@Getter
+@Setter
+@Builder
+@AllArgsConstructor
+@NoArgsConstructor
+@ToString
+@EqualsAndHashCode(of = "id")
 public class User {
     @Id
     @Column(name = "USER_ID")

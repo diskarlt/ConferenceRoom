@@ -1,32 +1,37 @@
 package com.kakaopay.recruite.conferenceroom.domain;
 
-import lombok.Builder;
-import lombok.Data;
+import lombok.*;
 
 import javax.persistence.*;
 import java.time.DayOfWeek;
 import java.time.LocalDate;
 import java.time.LocalTime;
 
-@Builder
 @Entity
-@Data
+@Getter
+@Setter
+@Builder
+@AllArgsConstructor
+@NoArgsConstructor
+@ToString
+@EqualsAndHashCode(of = "id")
 public class Reservation {
-    @Id @GeneratedValue
+    @Id
+    @GeneratedValue
     @Column(name = "RESERVATION_ID")
     private Long id;
 
     @ManyToOne
     @JoinColumn(name = "USER_ID")
-    private final User user;
+    private User user;
     @ManyToOne
     @JoinColumn(name = "ROOM_ID")
-    private final Room room;
+    private Room room;
 
-    private final int repeat;
-    private final DayOfWeek dayOfWeek;
-    private final LocalDate startDate;
-    private final LocalDate endDate;
-    private final LocalTime startTime;
-    private final LocalTime endTime;
+    private int repeat;
+    private DayOfWeek dayOfWeek;
+    private LocalDate startDate;
+    private LocalDate endDate;
+    private LocalTime startTime;
+    private LocalTime endTime;
 }

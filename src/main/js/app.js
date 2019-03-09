@@ -19,7 +19,7 @@ import {
   Row,
 } from 'reactstrap';
 
-var navStyle = {
+const navStyle = {
   position: 'fixed',
   height: '56px',
   width: '100%',
@@ -27,7 +27,7 @@ var navStyle = {
   zIndex: '1',
 }
 
-var tableHeaderStyle = {
+const tableHeaderStyle = {
   position: 'fixed',
   width: '100%',
   backgroundColor: 'white',
@@ -35,17 +35,17 @@ var tableHeaderStyle = {
   zIndex: '1',
 }
 
-var tableBodyStyle =  {
+const tableBodyStyle =  {
   paddingTop: '125px',
 }
 
-var reservationStyle =  {
+const reservationStyle =  {
   backgroundColor: '#ffc107',
   padding: '10px',
   borderLeft: '1px solid #dee2e6'
 }
 
-var datePickerStyle = {
+const datePickerStyle = {
   maxWidth: '150px',
   width: '150px',
   padding: '15px 10px',
@@ -55,21 +55,21 @@ var datePickerStyle = {
   backgroundColor: 'white',
 }
 
-var roomListStyle = {
+const roomListStyle = {
   padding: '20px 0px 20px 0px',
   verticalAlign: 'bottom',
   textAlign: 'center',
   borderBottom: '1px solid #dee2e6',
 }
 
-var timeRangeStyle = {
+const timeRangeStyle = {
   maxWidth: '150px',
   width: '150px',
   textAlign: 'center',
   padding: '0.75rem',
   borderTop: '1px solid #dee2e6',
 }
-var timeLineStyle = {
+const timeLineStyle = {
   borderTop: '1px solid #dee2e6',
   padding: '10px',
   borderLeft: '1px solid #dee2e6'
@@ -221,17 +221,7 @@ class App extends React.Component {
   handleSubmit(e) {
     e.preventDefault();
 
-    let roomId;
-    this.state.rooms.map((room, index) => {
-        if(room.roomName === this.state.roomName) {
-            roomId = room.id;
-        }
-    })
-
-    const room = {
-      "id" : roomId,
-      "roomName" : this.state.roomName
-    }
+    let room = this.state.rooms.filter(room => room.roomName === this.state.roomName)[0];
     const user = {
       "id" : this.state.userId,
       "userName" : this.state.userName

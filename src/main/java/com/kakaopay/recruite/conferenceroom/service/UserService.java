@@ -16,7 +16,10 @@ public class UserService {
     UserRepository userRepository;
 
     public User createUser(UserDto userDto) {
-        User user = User.builder().id(userDto.getId()).userName(userDto.getUserName()).build();
+        User user = User.builder()
+                .id(userDto.getId())
+                .userName(userDto.getUserName())
+                .build();
         userRepository.save(user);
         userDto.setId(user.getId());
         return user;
@@ -27,7 +30,6 @@ public class UserService {
     }
 
     public UserDto findUserByUserName(String userName) {
-        User user = userRepository.findByUserName(userName);
-        return UserDto.builder().id(user.getId()).userName(user.getUserName()).build();
+        return new UserDto(userRepository.findByUserName(userName));
     }
 }

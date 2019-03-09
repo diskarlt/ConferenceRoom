@@ -15,6 +15,9 @@ import java.time.LocalDate;
 import java.time.LocalTime;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Collectors;
+
+import static java.util.stream.Collectors.*;
 
 @Service
 @Slf4j
@@ -63,8 +66,12 @@ public class ReservationService {
 
         for(int i=0; i<=reservationDTO.getRepeat(); ++i) {
             for (LocalTime time = startTime; time.isBefore(endTime); time = time.plusMinutes(30)) {
-                ReservationStatus reservationStatus = ReservationStatus.builder().date(date.plusWeeks(i)).room(room).time(time).reservation(reservation).build();
-                reservationStatusRepository.save(reservationStatus);
+                reservationStatusRepository.save(ReservationStatus.builder()
+                        .date(date.plusWeeks(i))
+                        .room(room)
+                        .time(time)
+                        .reservation(reservation)
+                        .build());
             }
         }
     }
@@ -75,13 +82,10 @@ public class ReservationService {
      * @return 해당 날짜에 등록된 예약 List
      */
     public List<ReservationDto> findReservation(LocalDate date) {
-        List<ReservationDto> reservationDtoList = new ArrayList<>();
-        reservationRepository.findAllByDateAndDayOfWeek(date, date.getDayOfWeek()).forEach( reservation -> {
-                ReservationDto reservationDto = new ReservationDto(reservation);
-                reservationDtoList.add(reservationDto);
-            }
-        );
-        return reservationDtoList;
+        return reservationRepository.findAllByDateAndDayOfWeek(date, date.getDayOfWeek())
+                .stream()
+                .map(ReservationDto::new)
+                .collect(toList());
     }
 
     /**

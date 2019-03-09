@@ -62,12 +62,7 @@ public class ReservationController {
             month = Integer.valueOf(parameters.get("month"));
             day = Integer.valueOf(parameters.get("day"));
         }
-        LocalDate date = LocalDate.of(year, month, day);
-
-        List<ReservationDto> reservationDtoList = new ArrayList<>();
-
-        reservationService.findReservation(date).forEach(reservationData -> reservationDtoList.add(reservationData));
-        return reservationDtoList;
+        return reservationService.findReservation(LocalDate.of(year, month, day));
     }
 
     @DeleteMapping(value = "/reservations/{id}")

@@ -1,15 +1,19 @@
 package com.kakaopay.recruite.conferenceroom.domain;
 
-import lombok.Builder;
-import lombok.Data;
+import lombok.*;
 
 import javax.persistence.*;
 import java.time.LocalDate;
 import java.time.LocalTime;
 
-@Builder
 @Entity
-@Data
+@Getter
+@Setter
+@Builder
+@AllArgsConstructor
+@NoArgsConstructor
+@ToString
+@EqualsAndHashCode(of = "id")
 @Table(uniqueConstraints={
         @UniqueConstraint(columnNames = {"room_id", "date", "time"})
 })
@@ -20,8 +24,8 @@ public class ReservationStatus {
     @ManyToOne
     @JoinColumn(name = "ROOM_ID")
     private Room room;
-    private final LocalDate date;
-    private final LocalTime time;
+    private LocalDate date;
+    private LocalTime time;
 
     @ManyToOne
     @JoinColumn(name = "RESERVATION_ID")

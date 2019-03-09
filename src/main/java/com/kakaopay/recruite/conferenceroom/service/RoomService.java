@@ -11,6 +11,8 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
+import static java.util.stream.Collectors.toList;
+
 @Service
 @Slf4j
 public class RoomService {
@@ -18,7 +20,9 @@ public class RoomService {
     RoomRepository roomRepository;
 
     public void createRoom(RoomDto roomDto) {
-        Room room = Room.builder().roomName(roomDto.getRoomName()).build();
+        Room room = Room.builder()
+                .roomName(roomDto.getRoomName())
+                .build();
         roomRepository.save(room);
         roomDto.setId(room.getId());
     }
@@ -28,9 +32,10 @@ public class RoomService {
     }
 
     public List<RoomDto> findAllRoom() {
-        List<RoomDto> roomDtoList = new ArrayList<>();
-        roomRepository.findAll().forEach(room -> roomDtoList.add(RoomDto.builder().id(room.getId()).roomName(room.getRoomName()).build()));
-        return roomDtoList;
+        return roomRepository.findAll()
+                .stream()
+                .map(RoomDto::new)
+                .collect(toList());
     }
 
 }
